@@ -231,6 +231,32 @@ class __咖啡厅(具有返回和主页按钮, Scenes):
         return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
 
 
+class __咖啡厅_收益(可以点击空白处, Scenes):
+    class __领取(ElementClickAction, element):
+        def __new__(cls):
+            return ElementClickAction.__new__(cls, 963, 758)
+
+        def __init__(self):
+            self.src = self.Preprocessing(images.get("咖啡厅_收益"))
+
+        def Preprocessing(self, image: Image) -> Image:
+            return image.Crop((833, 714, 251, 94))
+
+        def Like(self, templ: Image) -> bool:
+            return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
+
+    领取 = __领取()
+
+    def __init__(self) -> None:
+        self.src = self.Preprocessing(images.get("咖啡厅_收益"))
+
+    def Preprocessing(self, image: Image) -> Image:
+        return image.CvtGray().Crop((803, 220, 317, 65))
+
+    def Like(self, templ: Image) -> bool:
+        return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
+
+
 Unknow = __Unknow()
 登录_进入游戏 = __登录_进入游戏()
 大厅 = __大厅()
@@ -242,6 +268,7 @@ Unknow = __Unknow()
 好感等级提升 = __好感等级提升()
 大厅_全屏 = __大厅_全屏()
 咖啡厅 = __咖啡厅()
+咖啡厅_收益 = __咖啡厅_收益()
 All: list[Scenes] = [
     Unknow,
     获得奖励,
@@ -254,6 +281,7 @@ All: list[Scenes] = [
     好感等级提升,
     大厅_全屏,
     咖啡厅,
+    咖啡厅_收益,
 ]
 
 
@@ -282,6 +310,8 @@ class Graph:
         小组大厅: [大厅],
         工作任务: [大厅],
         大厅_全屏: [大厅],
+        咖啡厅: [大厅, 咖啡厅_收益],
+        咖啡厅_收益: [咖啡厅],
     }
     actions: dict[Edge, list[Action]] = {
         Edge(登录_进入游戏, 大厅): [登录_进入游戏.空白处],
@@ -294,6 +324,8 @@ class Graph:
         Edge(小组大厅, 大厅): [小组大厅.返回],
         Edge(工作任务, 大厅): [工作任务.返回],
         Edge(咖啡厅, 大厅): [咖啡厅.返回],
+        Edge(咖啡厅, 咖啡厅_收益): [咖啡厅.收益],
+        Edge(咖啡厅_收益, 咖啡厅): [咖啡厅_收益.空白处],
     }
 
     def FindPath(self, frome: Scenes, to: Scenes) -> list[Scenes] | None:
