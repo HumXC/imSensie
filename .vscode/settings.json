@@ -1,0 +1,9 @@
+{
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.typeCheckingMode": "basic",
+    "terminal.integrated.env.linux": {},
+    "files.exclude": {
+        "**/.direnv": true,
+        "**/__pycache__": true
+    }
+}

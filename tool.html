@@ -1,0 +1,164 @@
+#!vivaldi
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>图片显示</title>
+        <style>
+            body,
+            html {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: flex-start;
+                background-color: #171717;
+            }
+
+            .info {
+                height: 20vh;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: #c2c2c2;
+                background-color: #171717;
+                font-size: 1.5em;
+            }
+
+            .image-container {
+                position: relative;
+                width: 90vw;
+                height: 70vh;
+                color: aliceblue;
+                background-color: #555555;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+                user-select: none; /* 禁止用户选中图片 */
+            }
+
+            .image-container img {
+                max-width: 90%;
+                max-height: 90%;
+                display: block;
+                pointer-events: none; /* 禁止图片响应鼠标事件，以便选择框正常工作 */
+            }
+
+            .selection-box {
+                position: absolute;
+                border: 2px dashed #26ff00;
+                pointer-events: auto;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="info" id="info">
+            <div id="selectionInfo"></div>
+            <br />
+            <button id="copyButton">复制</button>
+        </div>
+        <div class="image-container" id="imageContainer">
+            <img id="image" src="" alt="拖拽图片到这里" />
+        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const imageContainer = document.getElementById("imageContainer");
+                const imageElement = document.getElementById("image");
+                const selectionInfo = document.getElementById("selectionInfo");
+                const copyButton = document.getElementById("copyButton");
+
+                let selectionBox;
+                imageContainer.addEventListener("mousedown", (e) => {
+                    if (e.target.id != "imageContainer") {
+                        return;
+                    }
+                    if (!selectionBox) {
+                        selectionBox = document.createElement("div");
+                        selectionBox.className = "selection-box";
+                        imageContainer.appendChild(selectionBox);
+                    }
+                    const startX = e.offsetX;
+                    const startY = e.offsetY;
+                    let endX = startX;
+                    let endY = startY;
+                    const mousemoveHandler = (e) => {
+                        let containerRect = imageContainer.getBoundingClientRect();
+                        endX = e.clientX - containerRect.left;
+                        endY = e.clientY - containerRect.top;
+                        let imgRect = imageElement.getBoundingClientRect();
+                        const width = Math.abs(endX - startX);
+                        const height = Math.abs(endY - startY);
+                        const left = Math.min(endX, startX);
+                        const top = Math.min(endY, startY);
+                        selectionBox.style.left = left + "px";
+                        selectionBox.style.top = top + "px";
+                        selectionBox.style.width = width + "px";
+                        selectionBox.style.height = height + "px";
+
+                        let selBoxRect = selectionBox.getBoundingClientRect();
+                        let x = selBoxRect.left - imgRect.left;
+                        let y = selBoxRect.top - imgRect.top;
+                        let w = selBoxRect.width;
+                        let h = selBoxRect.height;
+
+                        let scaleX = imageElement.naturalWidth / imageElement.width;
+                        let scaleY = imageElement.naturalHeight / imageElement.height;
+
+                        x *= scaleX;
+                        y *= scaleY;
+                        w *= scaleX;
+                        h *= scaleY;
+
+                        selectionInfo.textContent = `(${Math.floor(x)}, ${Math.floor(
+                            y
+                        )}, ${Math.floor(w)}, ${Math.floor(h)})`;
+                    };
+
+                    const mouseupHandler = () => {
+                        imageContainer.removeEventListener("mousemove", mousemoveHandler);
+                        imageContainer.removeEventListener("mouseup", mouseupHandler);
+                        const width = Math.abs(endX - startX);
+                        const height = Math.abs(endY - startY);
+                        if (width == 0 && height == 0) {
+                            selectionBox.remove();
+                            selectionBox = null;
+                            return;
+                        }
+                    };
+
+                    imageContainer.addEventListener("mousemove", mousemoveHandler);
+                    imageContainer.addEventListener("mouseup", mouseupHandler);
+                });
+
+                imageContainer.addEventListener("dragover", (e) => {
+                    e.preventDefault();
+                });
+
+                imageContainer.addEventListener("drop", (e) => {
+                    e.preventDefault();
+                    const file = e.dataTransfer.files[0];
+                    if (file && file.type.startsWith("image/")) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            imageElement.src = event.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+                copyButton.addEventListener("click", () => {
+                    const textToCopy = selectionInfo.textContent;
+                    navigator.clipboard.writeText(textToCopy).catch((err) => {
+                        console.error("无法复制文本到剪贴板：", err);
+                    });
+                });
+            });
+        </script>
+    </body>
+</html>
