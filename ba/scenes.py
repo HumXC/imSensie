@@ -165,6 +165,17 @@ class __获得奖励(可以点击空白处, Scenes):
         return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.8)
 
 
+class __好感等级提升(可以点击空白处, Scenes):
+    def __init__(self) -> None:
+        self.src = self.Preprocessing(images.get("好感等级提升").Copy())
+
+    def Preprocessing(self, image: Image) -> Image:
+        return image.CvtGray().Crop((716, 899, 447, 81))
+
+    def Like(self, templ: Image) -> bool:
+        return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.8)
+
+
 Unknow = __Unknow()
 登录_进入游戏 = __登录_进入游戏()
 大厅 = __大厅()
@@ -173,6 +184,7 @@ Unknow = __Unknow()
 工作任务 = __工作任务()
 登录_通知 = __登录_通知()
 获得奖励 = __获得奖励()
+好感等级提升 = __好感等级提升()
 All: list[Scenes] = [
     Unknow,
     获得奖励,
@@ -182,6 +194,7 @@ All: list[Scenes] = [
     小组大厅,
     小组大厅_签到奖励,
     工作任务,
+    好感等级提升,
 ]
 
 
