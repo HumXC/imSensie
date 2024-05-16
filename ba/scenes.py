@@ -38,9 +38,24 @@ class __Unknow(可以点击空白处, Scenes):
         return True
 
 
-class __进入游戏(可以点击空白处, Scenes):
+class __登录_通知(可以点击空白处, Scenes):
     def __init__(self) -> None:
-        self.src = self.Preprocessing(images.get("进入游戏").Copy())
+        self.src = self.Preprocessing(images.get("登录_通知").Copy())
+
+    def Preprocessing(self, image: Image) -> Image:
+        return image
+
+    def Like(self, templ: Image) -> bool:
+        icon16plus = templ.Copy().Crop((1586, 892, 104, 133))
+        title = templ.Crop((897, 225, 124, 73))
+        return self.src.MatchTemplate(icon16plus).IsMax(
+            0.95
+        ) and self.src.MatchTemplate(title).IsMax(0.95)
+
+
+class __登录_进入游戏(可以点击空白处, Scenes):
+    def __init__(self) -> None:
+        self.src = self.Preprocessing(images.get("登录_进入游戏").Copy())
 
     def Preprocessing(self, image: Image) -> Image:
         return image.CvtGray().Crop((96, 994, 125, 68))
@@ -70,7 +85,7 @@ class __大厅(Scenes):
 
 
 class __工作任务(具有返回和主页按钮, Scenes):
-    class __工作任务X一键领取(ClickableElement, element):
+    class __一键领取(ClickableElement, element):
         def __new__(cls):
             return ClickableElement.__new__(cls, 1670, 1008)
 
@@ -83,7 +98,7 @@ class __工作任务(具有返回和主页按钮, Scenes):
         def Like(self, templ: Image) -> bool:
             return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
 
-    class __工作任务X领取(ClickableElement, Element):
+    class __领取(ClickableElement, Element):
         def __new__(cls):
             return ClickableElement.__new__(cls, 1419, 1003)
 
@@ -96,8 +111,8 @@ class __工作任务(具有返回和主页按钮, Scenes):
         def Like(self, templ: Image) -> bool:
             return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
 
-    一键领取: ClickableElement = __工作任务X一键领取()
-    领取: ClickableElement = __工作任务X领取()
+    一键领取: ClickableElement = __一键领取()
+    领取: ClickableElement = __领取()
 
     def __init__(self) -> None:
         self.src = self.Preprocessing(images.get("工作任务").Copy())
@@ -132,13 +147,15 @@ class __小组大厅_签到奖励(可以点击空白处, Scenes):
 
 
 Unknow = __Unknow()
-登录_进入游戏 = __进入游戏()
+登录_进入游戏 = __登录_进入游戏()
 大厅 = __大厅()
 小组大厅 = __小组大厅()
 小组大厅_签到奖励 = __小组大厅_签到奖励()
 工作任务 = __工作任务()
+登录_通知 = __登录_通知()
 All: list[Scenes] = [
     Unknow,
+    登录_通知,
     登录_进入游戏,
     大厅,
     小组大厅,

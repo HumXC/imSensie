@@ -16,7 +16,6 @@ class Likeable(Protocol):
 
 class ActionType(enum.Enum):
     CLICK = "click"
-    SWIPE = "swipe"
 
 
 class Action:

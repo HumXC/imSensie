@@ -4,7 +4,7 @@ from ..testing import TestDrives
 
 
 def test():
-    s = Screen(images.get("进入游戏"))
+    s = Screen(images.get("登录_进入游戏"))
     e = scenes.登录_进入游戏
     t = TestDrives(s)
 

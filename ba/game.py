@@ -80,31 +80,41 @@ class Game:
         if a.type == element.ActionType.CLICK:
             self.Click(cast(element.ClickAction, a))
 
-    def __goto(self, target: scenes.Scenes, actions: list[scenes.Action]):
+    def __goto(
+        self, frome: scenes.Scenes, to: scenes.Scenes, actions: list[scenes.Action]
+    ) -> bool:
         while True:
             c = self.CurrentScene()
+            if c == to:
+                return True
+            if c == frome:
+                for a in actions:
+                    self.__doAction(a)
             if c == scenes.Unknow:
-                self.UnknowLoop()
+                self.Click(scenes.Unknow.空白处)
+                time.sleep(1)
                 continue
-            for a in actions:
-                self.__doAction(a)
+            else:
+                return False
 
     def UnknowLoop(self):
-        self.Click(scenes.Unknow.空白处)
-        time.sleep(1)
-
-    def Goto(self, s: scenes.Scenes):
         s = self.CurrentScene()
         while True:
             if s == scenes.Unknow:
-                self.UnknowLoop()
+                self.Click(scenes.Unknow.空白处)
+                time.sleep(1)
                 s = self.CurrentScene()
                 continue
             break
 
+    def Goto(self, s: scenes.Scenes) -> bool:
+        self.UnknowLoop()
+        s = self.CurrentScene()
         path = self.grap.FindPath(s, s)
         if path is None:
             raise Exception("no path")
         actions = self.grap.FindActions(path)
         for i in range(len(path)):
-            self.__goto(path[i], actions[i])
+            if not self.__goto(s, path[i], actions[i]):
+                return False
+        return True
