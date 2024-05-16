@@ -1,4 +1,6 @@
 from typing import Iterable, cast
+
+import cv2
 from ba import images
 from ba.cv import Image
 from ba.element import Action, ClickAction, ClickableElement, Element
@@ -146,6 +148,23 @@ class __小组大厅_签到奖励(可以点击空白处, Scenes):
         return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
 
 
+class __获得奖励(可以点击空白处, Scenes):
+    def __init__(self) -> None:
+        self.src = self.Preprocessing(images.get("获得奖励").Copy())
+
+    def Preprocessing(self, image: Image) -> Image:
+        lower = (50, 0, 0)
+        upper = (255, 255, 255)
+        return (
+            image.Crop((738, 204, 454, 116))
+            .InRange(lower, upper)
+            .Threshold(0, type=cv2.THRESH_BINARY_INV)
+        )
+
+    def Like(self, templ: Image) -> bool:
+        return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.8)
+
+
 Unknow = __Unknow()
 登录_进入游戏 = __登录_进入游戏()
 大厅 = __大厅()
@@ -153,8 +172,10 @@ Unknow = __Unknow()
 小组大厅_签到奖励 = __小组大厅_签到奖励()
 工作任务 = __工作任务()
 登录_通知 = __登录_通知()
+获得奖励 = __获得奖励()
 All: list[Scenes] = [
     Unknow,
+    获得奖励,
     登录_通知,
     登录_进入游戏,
     大厅,
