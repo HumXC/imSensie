@@ -10,3 +10,10 @@ def testScenes():
     tscenes.大厅_全屏.test()
     tscenes.获得奖励.test()
     tscenes.好感等级提升.test()
+    tscenes.咖啡厅.test()
+    tscenes.工作任务.test()
+    tscenes.小组大厅.test()
+    tscenes.小组大厅_签到奖励.test()
+
+
+testScenes()

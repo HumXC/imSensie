@@ -101,7 +101,7 @@ class __工作任务(具有返回和主页按钮, Scenes):
         def Like(self, templ: Image) -> bool:
             return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
 
-    class __领取(ElementClickAction, Element):
+    class __领取(ElementClickAction, element):
         def __new__(cls):
             return ElementClickAction.__new__(cls, 1419, 1003)
 
@@ -140,7 +140,7 @@ class __小组大厅(具有返回和主页按钮, Scenes):
 
 class __小组大厅_签到奖励(可以点击空白处, Scenes):
     def __init__(self) -> None:
-        self.src = self.Preprocessing(images.get("小组大厅"))
+        self.src = self.Preprocessing(images.get("小组大厅_签到奖励"))
 
     def Preprocessing(self, image: Image) -> Image:
         return image.CvtGray().Crop((815, 229, 284, 64))
@@ -191,6 +191,46 @@ class __大厅_全屏(Scenes):
         return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
 
 
+class __咖啡厅(具有返回和主页按钮, Scenes):
+    class __邀请劵(ElementClickAction, element):
+        def __new__(cls):
+            return ElementClickAction.__new__(cls, 1227, 981)
+
+        def __init__(self):
+            self.src = self.Preprocessing(images.get("咖啡厅"))
+
+        def Preprocessing(self, image: Image) -> Image:
+            return image.Crop((1179, 940, 91, 101))
+
+        def Like(self, templ: Image) -> bool:
+            return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
+
+    class __收益(ElementClickAction, element):
+        def __new__(cls):
+            return ElementClickAction.__new__(cls, 1665, 965)
+
+        def __init__(self):
+            self.src = self.Preprocessing(images.get("咖啡厅"))
+
+        def Preprocessing(self, image: Image) -> Image:
+            return image.Crop((1585, 926, 189, 46))
+
+        def Like(self, templ: Image) -> bool:
+            return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
+
+    邀请劵 = __邀请劵()
+    收益 = __收益()
+
+    def __init__(self) -> None:
+        self.src = self.Preprocessing(images.get("咖啡厅"))
+
+    def Preprocessing(self, image: Image) -> Image:
+        return image.CvtGray().Crop((215, 1, 276, 58))
+
+    def Like(self, templ: Image) -> bool:
+        return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
+
+
 Unknow = __Unknow()
 登录_进入游戏 = __登录_进入游戏()
 大厅 = __大厅()
@@ -201,6 +241,7 @@ Unknow = __Unknow()
 获得奖励 = __获得奖励()
 好感等级提升 = __好感等级提升()
 大厅_全屏 = __大厅_全屏()
+咖啡厅 = __咖啡厅()
 All: list[Scenes] = [
     Unknow,
     获得奖励,
@@ -212,6 +253,7 @@ All: list[Scenes] = [
     工作任务,
     好感等级提升,
     大厅_全屏,
+    咖啡厅,
 ]
 
 
@@ -236,7 +278,7 @@ class Edge:
 class Graph:
     graph: dict[Scenes, list[Scenes]] = {
         登录_进入游戏: [大厅],
-        大厅: [小组大厅, 小组大厅_签到奖励, 工作任务, 大厅_全屏],
+        大厅: [小组大厅, 小组大厅_签到奖励, 工作任务, 大厅_全屏, 咖啡厅],
         小组大厅: [大厅],
         工作任务: [大厅],
         大厅_全屏: [大厅],
@@ -247,9 +289,11 @@ class Graph:
         Edge(大厅, 小组大厅_签到奖励): [大厅.小组],
         Edge(大厅, 工作任务): [大厅.工作任务],
         Edge(大厅, 大厅_全屏): [大厅.全屏大厅],
+        Edge(大厅, 咖啡厅): [大厅.咖啡厅],
         Edge(大厅_全屏, 大厅): [大厅_全屏.退出全屏],
         Edge(小组大厅, 大厅): [小组大厅.返回],
         Edge(工作任务, 大厅): [工作任务.返回],
+        Edge(咖啡厅, 大厅): [咖啡厅.返回],
     }
 
     def FindPath(self, frome: Scenes, to: Scenes) -> list[Scenes] | None:
