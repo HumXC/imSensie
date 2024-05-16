@@ -5,7 +5,7 @@ All: dict[str, Image] = {}
 
 
 def get(name: str) -> Image:
-    return All[name]
+    return All[name].Copy()
 
 
 def release():

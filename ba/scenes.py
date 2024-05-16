@@ -42,7 +42,7 @@ class __Unknow(可以点击空白处, Scenes):
 
 class __登录_通知(可以点击空白处, Scenes):
     def __init__(self) -> None:
-        self.src = self.Preprocessing(images.get("登录_通知").Copy())
+        self.src = self.Preprocessing(images.get("登录_通知"))
 
     def Preprocessing(self, image: Image) -> Image:
         return image
@@ -57,7 +57,7 @@ class __登录_通知(可以点击空白处, Scenes):
 
 class __登录_进入游戏(可以点击空白处, Scenes):
     def __init__(self) -> None:
-        self.src = self.Preprocessing(images.get("登录_进入游戏").Copy())
+        self.src = self.Preprocessing(images.get("登录_进入游戏"))
 
     def Preprocessing(self, image: Image) -> Image:
         return image.CvtGray().Crop((96, 994, 125, 68))
@@ -77,7 +77,7 @@ class __大厅(Scenes):
     业务区: ClickAction = ClickAction(1736, 875)
 
     def __init__(self) -> None:
-        self.src = self.Preprocessing(images.get("大厅").Copy())
+        self.src = self.Preprocessing(images.get("大厅"))
 
     def Preprocessing(self, image: Image) -> Image:
         return image.CvtGray().Crop((1512, 27, 288, 53))
@@ -92,7 +92,7 @@ class __工作任务(具有返回和主页按钮, Scenes):
             return ClickableElement.__new__(cls, 1670, 1008)
 
         def __init__(self):
-            self.src = self.Preprocessing(images.get("工作任务").Copy())
+            self.src = self.Preprocessing(images.get("工作任务"))
 
         def Preprocessing(self, image: Image) -> Image:
             return image.Crop((1546, 977, 237, 68))
@@ -105,7 +105,7 @@ class __工作任务(具有返回和主页按钮, Scenes):
             return ClickableElement.__new__(cls, 1419, 1003)
 
         def __init__(self):
-            self.src = self.Preprocessing(images.get("工作任务").Copy())
+            self.src = self.Preprocessing(images.get("工作任务"))
 
         def Preprocessing(self, image: Image) -> Image:
             return image.Crop((1375, 974, 96, 63))
@@ -117,7 +117,7 @@ class __工作任务(具有返回和主页按钮, Scenes):
     领取: ClickableElement = __领取()
 
     def __init__(self) -> None:
-        self.src = self.Preprocessing(images.get("工作任务").Copy())
+        self.src = self.Preprocessing(images.get("工作任务"))
 
     def Preprocessing(self, image: Image) -> Image:
         return image.CvtGray().Crop((210, 3, 171, 61))
@@ -128,7 +128,7 @@ class __工作任务(具有返回和主页按钮, Scenes):
 
 class __小组大厅(具有返回和主页按钮, Scenes):
     def __init__(self) -> None:
-        self.src = self.Preprocessing(images.get("小组大厅").Copy())
+        self.src = self.Preprocessing(images.get("小组大厅"))
 
     def Preprocessing(self, image: Image) -> Image:
         return image.CvtGray().Crop((210, 3, 171, 61))
@@ -139,7 +139,7 @@ class __小组大厅(具有返回和主页按钮, Scenes):
 
 class __小组大厅_签到奖励(可以点击空白处, Scenes):
     def __init__(self) -> None:
-        self.src = self.Preprocessing(images.get("小组大厅").Copy())
+        self.src = self.Preprocessing(images.get("小组大厅"))
 
     def Preprocessing(self, image: Image) -> Image:
         return image.CvtGray().Crop((815, 229, 284, 64))
@@ -150,7 +150,7 @@ class __小组大厅_签到奖励(可以点击空白处, Scenes):
 
 class __获得奖励(可以点击空白处, Scenes):
     def __init__(self) -> None:
-        self.src = self.Preprocessing(images.get("获得奖励").Copy())
+        self.src = self.Preprocessing(images.get("获得奖励"))
 
     def Preprocessing(self, image: Image) -> Image:
         lower = (50, 0, 0)
@@ -167,7 +167,7 @@ class __获得奖励(可以点击空白处, Scenes):
 
 class __好感等级提升(可以点击空白处, Scenes):
     def __init__(self) -> None:
-        self.src = self.Preprocessing(images.get("好感等级提升").Copy())
+        self.src = self.Preprocessing(images.get("好感等级提升"))
 
     def Preprocessing(self, image: Image) -> Image:
         return image.CvtGray().Crop((716, 899, 447, 81))
