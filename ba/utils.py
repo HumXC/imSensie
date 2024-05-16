@@ -1,9 +1,11 @@
-from typing import Callable
+from typing import Callable, cast
 
 import numpy as np
-from cv2.typing import Point, Rect
+from cv2.typing import Rect
 
 from ba.cv import Image
+
+Point = tuple[int, int]
 
 
 def Distance(p1: Point, p2: Point):
@@ -56,7 +58,7 @@ def FindRedPoint(img: Image, filter: Callable[[int, int], bool] = lambda x, y: T
         .FindContours()
         .GetCenterPionts()
     )
-    return FilterPoint(pts, 30, filter=filter)
+    return FilterPoint(cast(list[Point], pts), 30, filter=filter)
 
 
 def FindYellowPoint(img: Image, filter: Callable[[int, int], bool] = lambda x, y: True):
@@ -70,4 +72,4 @@ def FindYellowPoint(img: Image, filter: Callable[[int, int], bool] = lambda x, y
         .FindContours()
         .GetCenterPionts()
     )
-    return FilterPoint(pts, 30, filter=filter)
+    return FilterPoint(cast(list[Point], pts), 30, filter=filter)

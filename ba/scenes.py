@@ -3,7 +3,7 @@ from typing import Iterable, cast
 import cv2
 from ba import images
 from ba.cv import Image
-from ba.element import Action, ClickAction, ClickableElement, Element
+from ba.element import Action, ClickAction, ElementClickAction, Element
 
 
 class Scenes(Element):
@@ -69,6 +69,7 @@ class __登录_进入游戏(可以点击空白处, Scenes):
 class __大厅(Scenes):
     工作任务: ClickAction = ClickAction(156, 315)
     邮箱: ClickAction = ClickAction(1655, 56)
+    全屏大厅: ClickAction = ClickAction(1772, 129)
     咖啡厅: ClickAction = ClickAction(197, 1000)
     日程: ClickAction = ClickAction(360, 1000)
     成员: ClickAction = ClickAction(525, 1000)
@@ -87,9 +88,9 @@ class __大厅(Scenes):
 
 
 class __工作任务(具有返回和主页按钮, Scenes):
-    class __一键领取(ClickableElement, element):
+    class __一键领取(ElementClickAction, element):
         def __new__(cls):
-            return ClickableElement.__new__(cls, 1670, 1008)
+            return ElementClickAction.__new__(cls, 1670, 1008)
 
         def __init__(self):
             self.src = self.Preprocessing(images.get("工作任务"))
@@ -100,9 +101,9 @@ class __工作任务(具有返回和主页按钮, Scenes):
         def Like(self, templ: Image) -> bool:
             return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
 
-    class __领取(ClickableElement, Element):
+    class __领取(ElementClickAction, Element):
         def __new__(cls):
-            return ClickableElement.__new__(cls, 1419, 1003)
+            return ElementClickAction.__new__(cls, 1419, 1003)
 
         def __init__(self):
             self.src = self.Preprocessing(images.get("工作任务"))
@@ -113,8 +114,8 @@ class __工作任务(具有返回和主页按钮, Scenes):
         def Like(self, templ: Image) -> bool:
             return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
 
-    一键领取: ClickableElement = __一键领取()
-    领取: ClickableElement = __领取()
+    一键领取: ElementClickAction = __一键领取()
+    领取: ElementClickAction = __领取()
 
     def __init__(self) -> None:
         self.src = self.Preprocessing(images.get("工作任务"))
@@ -176,6 +177,20 @@ class __好感等级提升(可以点击空白处, Scenes):
         return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.8)
 
 
+class __大厅_全屏(Scenes):
+
+    退出全屏 = ClickAction(1770, 50)
+
+    def __init__(self) -> None:
+        self.src = self.Preprocessing(images.get("大厅_全屏"))
+
+    def Preprocessing(self, image: Image) -> Image:
+        return image.CvtGray().Crop((1731, 27, 83, 54))
+
+    def Like(self, templ: Image) -> bool:
+        return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
+
+
 Unknow = __Unknow()
 登录_进入游戏 = __登录_进入游戏()
 大厅 = __大厅()
@@ -185,6 +200,7 @@ Unknow = __Unknow()
 登录_通知 = __登录_通知()
 获得奖励 = __获得奖励()
 好感等级提升 = __好感等级提升()
+大厅_全屏 = __大厅_全屏()
 All: list[Scenes] = [
     Unknow,
     获得奖励,
@@ -195,6 +211,7 @@ All: list[Scenes] = [
     小组大厅_签到奖励,
     工作任务,
     好感等级提升,
+    大厅_全屏,
 ]
 
 
@@ -219,15 +236,18 @@ class Edge:
 class Graph:
     graph: dict[Scenes, list[Scenes]] = {
         登录_进入游戏: [大厅],
-        大厅: [小组大厅, 小组大厅_签到奖励, 工作任务],
+        大厅: [小组大厅, 小组大厅_签到奖励, 工作任务, 大厅_全屏],
         小组大厅: [大厅],
         工作任务: [大厅],
+        大厅_全屏: [大厅],
     }
     actions: dict[Edge, list[Action]] = {
         Edge(登录_进入游戏, 大厅): [登录_进入游戏.空白处],
         Edge(大厅, 小组大厅): [大厅.小组],
         Edge(大厅, 小组大厅_签到奖励): [大厅.小组],
         Edge(大厅, 工作任务): [大厅.工作任务],
+        Edge(大厅, 大厅_全屏): [大厅.全屏大厅],
+        Edge(大厅_全屏, 大厅): [大厅_全屏.退出全屏],
         Edge(小组大厅, 大厅): [小组大厅.返回],
         Edge(工作任务, 大厅): [工作任务.返回],
     }

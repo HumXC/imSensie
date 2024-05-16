@@ -11,6 +11,7 @@ def test():
     assert s.IsLike(e)
     t.Click(e.工作任务)
     t.Click(e.邮箱)
+    t.Click(e.全屏大厅)
     t.Click(e.咖啡厅)
     t.Click(e.日程)
     t.Click(e.成员)
