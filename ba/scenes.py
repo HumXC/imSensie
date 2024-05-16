@@ -14,7 +14,7 @@ class Scenes(Element):
 
     def Preprocessing(self, image: Image) -> Image: ...
 
-    def Like(self, templ: Image) -> bool: ...
+    def Like(self, image: Image) -> bool: ...
 
 
 element = Scenes
@@ -36,23 +36,29 @@ class __Unknow(可以点击空白处, Scenes):
     def Preprocessing(self, image: Image) -> Image:
         return image
 
-    def Like(self, templ: Image) -> bool:
+    def Like(self, image: Image) -> bool:
         return True
 
 
 class __登录_通知(可以点击空白处, Scenes):
+    icon16plus: Image
+    title: Image
+
     def __init__(self) -> None:
-        self.src = self.Preprocessing(images.get("登录_通知"))
+        base = self.Preprocessing(images.get("登录_通知"))
+        self.icon16plus = base.Copy().Crop((1586, 892, 104, 133))
+        self.title = base.Crop((897, 225, 124, 73))
 
     def Preprocessing(self, image: Image) -> Image:
-        return image
+        return image.CvtGray()
 
-    def Like(self, templ: Image) -> bool:
-        icon16plus = templ.Copy().Crop((1586, 892, 104, 133))
-        title = templ.Crop((897, 225, 124, 73))
-        return self.src.MatchTemplate(icon16plus).IsMax(
+    def Like(self, image: Image) -> bool:
+        base = self.Preprocessing(image)
+        icon16plus = base.Copy().Crop((1586, 892, 104, 133))
+        title = base.Crop((897, 225, 124, 73))
+        return self.icon16plus.MatchTemplate(icon16plus).IsMax(
             0.95
-        ) and self.src.MatchTemplate(title).IsMax(0.95)
+        ) and self.title.MatchTemplate(title).IsMax(0.95)
 
 
 class __登录_进入游戏(可以点击空白处, Scenes):
@@ -62,8 +68,8 @@ class __登录_进入游戏(可以点击空白处, Scenes):
     def Preprocessing(self, image: Image) -> Image:
         return image.CvtGray().Crop((96, 994, 125, 68))
 
-    def Like(self, templ: Image) -> bool:
-        return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
+    def Like(self, image: Image) -> bool:
+        return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
 class __大厅(Scenes):
@@ -83,8 +89,8 @@ class __大厅(Scenes):
     def Preprocessing(self, image: Image) -> Image:
         return image.CvtGray().Crop((1512, 27, 288, 53))
 
-    def Like(self, templ: Image) -> bool:
-        return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
+    def Like(self, image: Image) -> bool:
+        return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
 class __工作任务(具有返回和主页按钮, Scenes):
@@ -98,8 +104,8 @@ class __工作任务(具有返回和主页按钮, Scenes):
         def Preprocessing(self, image: Image) -> Image:
             return image.Crop((1546, 977, 237, 68))
 
-        def Like(self, templ: Image) -> bool:
-            return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
+        def Like(self, image: Image) -> bool:
+            return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
     class __领取(ElementClickAction, element):
         def __new__(cls):
@@ -111,8 +117,8 @@ class __工作任务(具有返回和主页按钮, Scenes):
         def Preprocessing(self, image: Image) -> Image:
             return image.Crop((1375, 974, 96, 63))
 
-        def Like(self, templ: Image) -> bool:
-            return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
+        def Like(self, image: Image) -> bool:
+            return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
     一键领取: ElementClickAction = __一键领取()
     领取: ElementClickAction = __领取()
@@ -123,8 +129,8 @@ class __工作任务(具有返回和主页按钮, Scenes):
     def Preprocessing(self, image: Image) -> Image:
         return image.CvtGray().Crop((210, 3, 171, 61))
 
-    def Like(self, templ: Image) -> bool:
-        return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
+    def Like(self, image: Image) -> bool:
+        return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
 class __小组大厅(具有返回和主页按钮, Scenes):
@@ -134,8 +140,8 @@ class __小组大厅(具有返回和主页按钮, Scenes):
     def Preprocessing(self, image: Image) -> Image:
         return image.CvtGray().Crop((210, 3, 171, 61))
 
-    def Like(self, templ: Image) -> bool:
-        return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
+    def Like(self, image: Image) -> bool:
+        return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
 class __小组大厅_签到奖励(可以点击空白处, Scenes):
@@ -145,8 +151,8 @@ class __小组大厅_签到奖励(可以点击空白处, Scenes):
     def Preprocessing(self, image: Image) -> Image:
         return image.CvtGray().Crop((815, 229, 284, 64))
 
-    def Like(self, templ: Image) -> bool:
-        return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
+    def Like(self, image: Image) -> bool:
+        return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
 class __获得奖励(可以点击空白处, Scenes):
@@ -162,8 +168,8 @@ class __获得奖励(可以点击空白处, Scenes):
             .Threshold(0, type=cv2.THRESH_BINARY_INV)
         )
 
-    def Like(self, templ: Image) -> bool:
-        return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.8)
+    def Like(self, image: Image) -> bool:
+        return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.8)
 
 
 class __好感等级提升(可以点击空白处, Scenes):
@@ -173,8 +179,8 @@ class __好感等级提升(可以点击空白处, Scenes):
     def Preprocessing(self, image: Image) -> Image:
         return image.CvtGray().Crop((716, 899, 447, 81))
 
-    def Like(self, templ: Image) -> bool:
-        return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.8)
+    def Like(self, image: Image) -> bool:
+        return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.8)
 
 
 class __大厅_全屏(Scenes):
@@ -187,8 +193,8 @@ class __大厅_全屏(Scenes):
     def Preprocessing(self, image: Image) -> Image:
         return image.CvtGray().Crop((1731, 27, 83, 54))
 
-    def Like(self, templ: Image) -> bool:
-        return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
+    def Like(self, image: Image) -> bool:
+        return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
 class __咖啡厅(具有返回和主页按钮, Scenes):
@@ -202,8 +208,8 @@ class __咖啡厅(具有返回和主页按钮, Scenes):
         def Preprocessing(self, image: Image) -> Image:
             return image.Crop((1179, 940, 91, 101))
 
-        def Like(self, templ: Image) -> bool:
-            return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
+        def Like(self, image: Image) -> bool:
+            return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
     class __收益(ElementClickAction, element):
         def __new__(cls):
@@ -215,8 +221,8 @@ class __咖啡厅(具有返回和主页按钮, Scenes):
         def Preprocessing(self, image: Image) -> Image:
             return image.Crop((1585, 926, 189, 46))
 
-        def Like(self, templ: Image) -> bool:
-            return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
+        def Like(self, image: Image) -> bool:
+            return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
     邀请劵 = __邀请劵()
     收益 = __收益()
@@ -227,8 +233,29 @@ class __咖啡厅(具有返回和主页按钮, Scenes):
     def Preprocessing(self, image: Image) -> Image:
         return image.CvtGray().Crop((215, 1, 276, 58))
 
-    def Like(self, templ: Image) -> bool:
-        return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
+    def Like(self, image: Image) -> bool:
+        return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
+
+
+class __咖啡厅_说明(可以点击空白处, Scenes):
+    title: Image
+    subTitle: Image
+
+    def __init__(self) -> None:
+        base = self.Preprocessing(images.get("咖啡厅_说明"))
+        self.title = base.Copy().Crop((215, 1, 276, 58))
+        self.subTitle = base.Crop((897, 263, 130, 62))
+
+    def Preprocessing(self, image: Image) -> Image:
+        return image.CvtGray()
+
+    def Like(self, image: Image) -> bool:
+        base = self.Preprocessing(image)
+        title = base.Copy().Crop((215, 1, 276, 58))
+        subTitle = base.Crop((897, 263, 130, 62))
+        return self.title.MatchTemplate(title).IsMax(
+            0.95
+        ) and self.subTitle.MatchTemplate(subTitle).IsMax(0.95)
 
 
 class __咖啡厅_收益(可以点击空白处, Scenes):
@@ -242,8 +269,8 @@ class __咖啡厅_收益(可以点击空白处, Scenes):
         def Preprocessing(self, image: Image) -> Image:
             return image.Crop((833, 714, 251, 94))
 
-        def Like(self, templ: Image) -> bool:
-            return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
+        def Like(self, image: Image) -> bool:
+            return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
     领取 = __领取()
 
@@ -253,8 +280,8 @@ class __咖啡厅_收益(可以点击空白处, Scenes):
     def Preprocessing(self, image: Image) -> Image:
         return image.CvtGray().Crop((803, 220, 317, 65))
 
-    def Like(self, templ: Image) -> bool:
-        return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
+    def Like(self, image: Image) -> bool:
+        return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
 Unknow = __Unknow()
@@ -269,6 +296,7 @@ Unknow = __Unknow()
 大厅_全屏 = __大厅_全屏()
 咖啡厅 = __咖啡厅()
 咖啡厅_收益 = __咖啡厅_收益()
+咖啡厅_说明 = __咖啡厅_说明()
 All: list[Scenes] = [
     Unknow,
     获得奖励,
@@ -282,6 +310,7 @@ All: list[Scenes] = [
     大厅_全屏,
     咖啡厅,
     咖啡厅_收益,
+    咖啡厅_说明,
 ]
 
 
@@ -306,12 +335,18 @@ class Edge:
 class Graph:
     graph: dict[Scenes, list[Scenes]] = {
         登录_进入游戏: [大厅],
-        大厅: [小组大厅, 小组大厅_签到奖励, 工作任务, 大厅_全屏, 咖啡厅],
+        大厅: [
+            小组大厅,
+            工作任务,
+            大厅_全屏,
+            咖啡厅,
+        ],
         小组大厅: [大厅],
         工作任务: [大厅],
         大厅_全屏: [大厅],
         咖啡厅: [大厅, 咖啡厅_收益],
         咖啡厅_收益: [咖啡厅],
+        咖啡厅_说明: [咖啡厅],
     }
     actions: dict[Edge, list[Action]] = {
         Edge(登录_进入游戏, 大厅): [登录_进入游戏.空白处],
@@ -320,12 +355,14 @@ class Graph:
         Edge(大厅, 工作任务): [大厅.工作任务],
         Edge(大厅, 大厅_全屏): [大厅.全屏大厅],
         Edge(大厅, 咖啡厅): [大厅.咖啡厅],
+        Edge(大厅, 咖啡厅_说明): [大厅.咖啡厅],
         Edge(大厅_全屏, 大厅): [大厅_全屏.退出全屏],
         Edge(小组大厅, 大厅): [小组大厅.返回],
         Edge(工作任务, 大厅): [工作任务.返回],
         Edge(咖啡厅, 大厅): [咖啡厅.返回],
         Edge(咖啡厅, 咖啡厅_收益): [咖啡厅.收益],
         Edge(咖啡厅_收益, 咖啡厅): [咖啡厅_收益.空白处],
+        Edge(咖啡厅_说明, 咖啡厅): [咖啡厅_说明.空白处],
     }
 
     def FindPath(self, frome: Scenes, to: Scenes) -> list[Scenes] | None:
