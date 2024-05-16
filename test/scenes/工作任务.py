@@ -1,6 +1,6 @@
 from ba import images, scenes
 from ba.element import Screen
-from ..testing import TestDrives
+from ..testing import AssertScene, TestDrives
 
 
 def test():
@@ -8,7 +8,7 @@ def test():
     e = scenes.工作任务
     t = TestDrives(s)
 
-    assert s.IsLike(e)
+    AssertScene(s, e)
     assert s.IsLike(e.一键领取)
     assert s.IsLike(e.领取)
 

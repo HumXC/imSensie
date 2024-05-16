@@ -16,8 +16,9 @@ def testScenes():
     tscenes.工作任务.test()
     tscenes.小组大厅.test()
     tscenes.小组大厅_签到奖励.test()
+    tscenes.登录_更新提醒.test()
 
 
 # testScenes()
 # tscenes.咖啡厅_收益.test()
-tscenes.咖啡厅_说明.test()
+tscenes.登录_更新提醒.test()

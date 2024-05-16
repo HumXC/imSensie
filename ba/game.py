@@ -28,13 +28,6 @@ SCREEN_SIZE = (1080, 1920)
 IMAGE_SIZE = (1920, 1080)
 
 
-def WhichScenes(s: element.Screen) -> scenes.Scenes:
-    for e in scenes.All:
-        if s.IsLike(e):
-            return e
-    return scenes.Unknow
-
-
 class Game:
     srk: Client
     input: Input
@@ -71,10 +64,14 @@ class Game:
         self.srk.shell.StopApp(Pkgname)
 
     def Click(self, p: ClickAction):
-        self.input.Tap((p[0], p[1]))
+        self.input.Tap(p)
 
     def CurrentScene(self):
-        return WhichScenes(self.Screen())
+        s = self.Screen()
+        for e in scenes.All:
+            if s.IsLike(e):
+                return e
+        return scenes.Unknow
 
     def __doAction(self, a: scenes.Action):
         if a.type == element.ActionType.CLICK:
@@ -90,6 +87,7 @@ class Game:
             if c == frome:
                 for a in actions:
                     self.__doAction(a)
+                continue
             if c == scenes.Unknow:
                 self.Click(scenes.Unknow.空白处)
                 time.sleep(1)
@@ -97,24 +95,26 @@ class Game:
             else:
                 return False
 
-    def UnknowLoop(self):
-        s = self.CurrentScene()
+    def Goto(self, s: scenes.Scenes) -> bool:
         while True:
-            if s == scenes.Unknow:
+            cs = self.CurrentScene()
+            if cs == scenes.Unknow:
                 self.Click(scenes.Unknow.空白处)
                 time.sleep(1)
-                s = self.CurrentScene()
+                cs = self.CurrentScene()
                 continue
-            break
+            if cs == scenes.登录_更新提醒:
+                cs = self.CurrentScene()
+                self.Click(scenes.登录_更新提醒.确认)
+                time.sleep(1)
+                continue
 
-    def Goto(self, s: scenes.Scenes) -> bool:
-        self.UnknowLoop()
-        s = self.CurrentScene()
-        path = self.grap.FindPath(s, s)
-        if path is None:
-            raise Exception("no path")
-        actions = self.grap.FindActions(path)
-        for i in range(len(path)):
-            if not self.__goto(s, path[i], actions[i]):
-                return False
-        return True
+            path = self.grap.FindPath(cs, s)
+            if path is None:
+                raise Exception("no path")
+            actions = self.grap.FindActions(path)
+            for i in range(len(path)):
+                if not self.__goto(cs, path[i], actions[i]):
+                    return False
+                cs = self.CurrentScene()
+            return True

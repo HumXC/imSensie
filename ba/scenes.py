@@ -72,6 +72,19 @@ class __登录_进入游戏(可以点击空白处, Scenes):
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
+class __登录_更新提醒(Scenes):
+    确认 = ClickAction(1138, 728)
+
+    def __init__(self) -> None:
+        self.src = self.Preprocessing(images.get("登录_更新提醒"))
+
+    def Preprocessing(self, image: Image) -> Image:
+        return image.CvtGray().Crop((851, 231, 210, 62))
+
+    def Like(self, image: Image) -> bool:
+        return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
+
+
 class __大厅(Scenes):
     工作任务: ClickAction = ClickAction(156, 315)
     邮箱: ClickAction = ClickAction(1655, 56)
@@ -87,7 +100,7 @@ class __大厅(Scenes):
         self.src = self.Preprocessing(images.get("大厅"))
 
     def Preprocessing(self, image: Image) -> Image:
-        return image.CvtGray().Crop((1512, 27, 288, 53))
+        return image.Crop((1512, 27, 288, 53)).CvtColor(cv2.COLOR_BGR2HLS).Apply()
 
     def Like(self, image: Image) -> bool:
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
@@ -285,12 +298,14 @@ class __咖啡厅_收益(可以点击空白处, Scenes):
 
 
 Unknow = __Unknow()
+
+登录_通知 = __登录_通知()
 登录_进入游戏 = __登录_进入游戏()
+登录_更新提醒 = __登录_更新提醒()
 大厅 = __大厅()
 小组大厅 = __小组大厅()
 小组大厅_签到奖励 = __小组大厅_签到奖励()
 工作任务 = __工作任务()
-登录_通知 = __登录_通知()
 获得奖励 = __获得奖励()
 好感等级提升 = __好感等级提升()
 大厅_全屏 = __大厅_全屏()
@@ -298,7 +313,6 @@ Unknow = __Unknow()
 咖啡厅_收益 = __咖啡厅_收益()
 咖啡厅_说明 = __咖啡厅_说明()
 All: list[Scenes] = [
-    Unknow,
     获得奖励,
     登录_通知,
     登录_进入游戏,
@@ -311,6 +325,7 @@ All: list[Scenes] = [
     咖啡厅,
     咖啡厅_收益,
     咖啡厅_说明,
+    登录_更新提醒,
 ]
 
 
@@ -351,7 +366,6 @@ class Graph:
     actions: dict[Edge, list[Action]] = {
         Edge(登录_进入游戏, 大厅): [登录_进入游戏.空白处],
         Edge(大厅, 小组大厅): [大厅.小组],
-        Edge(大厅, 小组大厅_签到奖励): [大厅.小组],
         Edge(大厅, 工作任务): [大厅.工作任务],
         Edge(大厅, 大厅_全屏): [大厅.全屏大厅],
         Edge(大厅, 咖啡厅): [大厅.咖啡厅],

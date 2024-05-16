@@ -1,6 +1,6 @@
 from ba import images, scenes
 from ba.element import Screen
-from ..testing import TestDrives
+from ..testing import AssertScene, TestDrives
 
 
 def test():
@@ -8,6 +8,7 @@ def test():
     e = scenes.大厅_全屏
     t = TestDrives(s)
 
-    assert s.IsLike(e)
+    AssertScene(s, e)
+
     t.Click(e.退出全屏)
     t.Show()
