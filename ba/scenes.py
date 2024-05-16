@@ -1,12 +1,11 @@
-from typing import cast
+from typing import Iterable, cast
 from ba import images
 from ba.cv import Image
-from ba.element import Action, Clickable, Scenes
+from ba.element import Action, ClickAction, ClickableElement, Element
 
 
-class scenes(Scenes):
+class Scenes(Element):
     src: Image
-    id: str
 
     def __init__(self, image: Image) -> None:
         self.src = self.Preprocessing(image.Copy())
@@ -16,16 +15,19 @@ class scenes(Scenes):
     def Like(self, templ: Image) -> bool: ...
 
 
+element = Scenes
+
+
 class 可以点击空白处:
-    空白处: Clickable = (1, 1)
+    空白处: ClickAction = ClickAction(1, 1)
 
 
 class 具有返回和主页按钮:
-    返回: Clickable = (156, 46)
-    大厅: Clickable = (1785, 31)
+    返回: ClickAction = ClickAction(156, 46)
+    大厅: ClickAction = ClickAction(1785, 31)
 
 
-class __Unknow(可以点击空白处, scenes):
+class __Unknow(可以点击空白处, Scenes):
     def __init__(self) -> None:
         pass
 
@@ -36,7 +38,7 @@ class __Unknow(可以点击空白处, scenes):
         return True
 
 
-class __进入游戏(可以点击空白处, scenes):
+class __进入游戏(可以点击空白处, Scenes):
     def __init__(self) -> None:
         self.src = self.Preprocessing(images.get("进入游戏").Copy())
 
@@ -47,15 +49,15 @@ class __进入游戏(可以点击空白处, scenes):
         return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
 
 
-class __大厅(scenes):
-    工作任务: Clickable = (156, 315)
-    邮箱: Clickable = (1655, 56)
-    咖啡厅: Clickable = (197, 1000)
-    日程: Clickable = (360, 1000)
-    成员: Clickable = (525, 1000)
-    小组: Clickable = (856, 1000)
-    商店: Clickable = (1174, 1000)
-    业务区: Clickable = (1736, 875)
+class __大厅(Scenes):
+    工作任务: ClickAction = ClickAction(156, 315)
+    邮箱: ClickAction = ClickAction(1655, 56)
+    咖啡厅: ClickAction = ClickAction(197, 1000)
+    日程: ClickAction = ClickAction(360, 1000)
+    成员: ClickAction = ClickAction(525, 1000)
+    小组: ClickAction = ClickAction(856, 1000)
+    商店: ClickAction = ClickAction(1174, 1000)
+    业务区: ClickAction = ClickAction(1736, 875)
 
     def __init__(self) -> None:
         self.src = self.Preprocessing(images.get("大厅").Copy())
@@ -67,7 +69,47 @@ class __大厅(scenes):
         return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
 
 
-class __小组大厅(具有返回和主页按钮, scenes):
+class __工作任务(具有返回和主页按钮, Scenes):
+    class __工作任务X一键领取(ClickableElement, element):
+        def __new__(cls):
+            return ClickableElement.__new__(cls, 1670, 1008)
+
+        def __init__(self):
+            self.src = self.Preprocessing(images.get("工作任务").Copy())
+
+        def Preprocessing(self, image: Image) -> Image:
+            return image.Crop((1546, 977, 237, 68))
+
+        def Like(self, templ: Image) -> bool:
+            return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
+
+    class __工作任务X领取(ClickableElement, Element):
+        def __new__(cls):
+            return ClickableElement.__new__(cls, 1419, 1003)
+
+        def __init__(self):
+            self.src = self.Preprocessing(images.get("工作任务").Copy())
+
+        def Preprocessing(self, image: Image) -> Image:
+            return image.Crop((1375, 974, 96, 63))
+
+        def Like(self, templ: Image) -> bool:
+            return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
+
+    一键领取: ClickableElement = __工作任务X一键领取()
+    领取: ClickableElement = __工作任务X领取()
+
+    def __init__(self) -> None:
+        self.src = self.Preprocessing(images.get("工作任务").Copy())
+
+    def Preprocessing(self, image: Image) -> Image:
+        return image.CvtGray().Crop((210, 3, 171, 61))
+
+    def Like(self, templ: Image) -> bool:
+        return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
+
+
+class __小组大厅(具有返回和主页按钮, Scenes):
     def __init__(self) -> None:
         self.src = self.Preprocessing(images.get("小组大厅").Copy())
 
@@ -78,7 +120,7 @@ class __小组大厅(具有返回和主页按钮, scenes):
         return self.src.MatchTemplate(self.Preprocessing(templ)).IsMax(0.95)
 
 
-class __小组大厅_签到奖励(可以点击空白处, scenes):
+class __小组大厅_签到奖励(可以点击空白处, Scenes):
     def __init__(self) -> None:
         self.src = self.Preprocessing(images.get("小组大厅").Copy())
 
@@ -90,16 +132,18 @@ class __小组大厅_签到奖励(可以点击空白处, scenes):
 
 
 Unknow = __Unknow()
-进入游戏 = __进入游戏()
+登录_进入游戏 = __进入游戏()
 大厅 = __大厅()
 小组大厅 = __小组大厅()
 小组大厅_签到奖励 = __小组大厅_签到奖励()
+工作任务 = __工作任务()
 All: list[Scenes] = [
-    进入游戏,
+    Unknow,
+    登录_进入游戏,
     大厅,
     小组大厅,
     小组大厅_签到奖励,
-    Unknow,
+    工作任务,
 ]
 
 
@@ -123,15 +167,18 @@ class Edge:
 
 class Graph:
     graph: dict[Scenes, list[Scenes]] = {
-        进入游戏: [大厅],
-        大厅: [小组大厅, 小组大厅_签到奖励],
+        登录_进入游戏: [大厅],
+        大厅: [小组大厅, 小组大厅_签到奖励, 工作任务],
         小组大厅: [大厅],
+        工作任务: [大厅],
     }
     actions: dict[Edge, list[Action]] = {
-        Edge(进入游戏, 大厅): [进入游戏.空白处],
+        Edge(登录_进入游戏, 大厅): [登录_进入游戏.空白处],
         Edge(大厅, 小组大厅): [大厅.小组],
         Edge(大厅, 小组大厅_签到奖励): [大厅.小组],
+        Edge(大厅, 工作任务): [大厅.工作任务],
         Edge(小组大厅, 大厅): [小组大厅.返回],
+        Edge(工作任务, 大厅): [工作任务.返回],
     }
 
     def FindPath(self, frome: Scenes, to: Scenes) -> list[Scenes] | None:

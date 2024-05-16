@@ -3,6 +3,7 @@ import time
 import shiroko
 
 import ba
+from ba import scenes
 from ba.game import Game
 from ba.utils import *
 
@@ -13,7 +14,9 @@ def main():
     srk = shiroko.Client(ADDR)
     game = Game(srk)
     game.Launch()
-    game.Run()
+    game.Goto(scenes.工作任务)
+    if game.Screen().IsLike(scenes.工作任务.一键领取):
+        game.Click(scenes.工作任务.一键领取)
     srk.window.ResetSize()
     print("Done")
 

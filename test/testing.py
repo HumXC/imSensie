@@ -1,5 +1,5 @@
 import cv2
-from ba.element import Clickable, Screen
+from ba.element import ClickAction, Screen
 
 
 class TestDrives:
@@ -13,7 +13,7 @@ class TestDrives:
         wait, destry = self.screen.src.Show()
         wait()
 
-    def Click(self, c: Clickable):
+    def Click(self, c: ClickAction):
         self.step += 1
 
         font = cv2.FONT_HERSHEY_SIMPLEX

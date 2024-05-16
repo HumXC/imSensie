@@ -1,11 +1,12 @@
-from typing import Callable, Protocol, cast
+import enum
+from typing import Callable, Iterable, Protocol, cast
 
 import cv2
 
 from ba.cv import Image
 
 
-class Element(Protocol):
+class Preprocessor(Protocol):
     def Preprocessing(self, image: Image) -> Image: ...
 
 
@@ -13,12 +14,27 @@ class Likeable(Protocol):
     def Like(self, templ: Image) -> bool: ...
 
 
-Clickable = tuple[int, int]
-Swipable = tuple[Clickable, Clickable]
-Action = Clickable | Swipable
+class ActionType(enum.Enum):
+    CLICK = "click"
+    SWIPE = "swipe"
 
 
-class Scenes(Element, Likeable, Protocol): ...
+class Action:
+    type: ActionType
+
+
+class ClickAction(Action, tuple[int, int]):
+    def __new__(cls, x: int, y: int):
+        return super().__new__(cls, (x, y))
+
+    def __init__(self, x: int, y: int) -> None:
+        self.type = ActionType.CLICK
+
+
+class Element(Preprocessor, Likeable): ...
+
+
+class ClickableElement(ClickAction, Element): ...
 
 
 class Screen:

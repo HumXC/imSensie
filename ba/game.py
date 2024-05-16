@@ -1,4 +1,5 @@
 import time
+from typing import cast
 
 from cv2.typing import Size
 from shiroko import Client, Importance
@@ -6,7 +7,7 @@ from shiroko.input import Input
 
 from ba import scenes
 from ba import element
-from ba.element import Clickable
+from ba.element import ClickAction
 from ba.cv import Image
 
 
@@ -27,7 +28,7 @@ SCREEN_SIZE = (1080, 1920)
 IMAGE_SIZE = (1920, 1080)
 
 
-def WhichScenes(s: element.Screen) -> element.Scenes:
+def WhichScenes(s: element.Screen) -> scenes.Scenes:
     for e in scenes.All:
         if s.IsLike(e):
             return e
@@ -37,10 +38,12 @@ def WhichScenes(s: element.Screen) -> element.Scenes:
 class Game:
     srk: Client
     input: Input
+    grap: scenes.Graph
 
     def __init__(self, srk: Client) -> None:
         self.srk = srk
         self.input = self.srk.input
+        self.grap = scenes.Graph()
 
     def Png(self):
         img = Image(self.srk.screencap.Png())
@@ -67,31 +70,41 @@ class Game:
     def Kill(self):
         self.srk.shell.StopApp(Pkgname)
 
-    def Click(self, p: Clickable):
+    def Click(self, p: ClickAction):
         self.input.Tap((p[0], p[1]))
 
-    def Run(self):
-        def click(p: Clickable):
-            def f():
-                self.Click(p)
+    def CurrentScene(self):
+        return WhichScenes(self.Screen())
 
-            return f
+    def __doAction(self, a: scenes.Action):
+        if a.type == element.ActionType.CLICK:
+            self.Click(cast(element.ClickAction, a))
 
-        actions = {
-            scenes.进入游戏: click(scenes.进入游戏.空白处),
-            scenes.大厅: click(scenes.大厅.小组),
-            scenes.小组大厅: click(scenes.小组大厅.返回),
-            scenes.小组大厅_签到奖励: click(scenes.小组大厅_签到奖励.空白处),
-            scenes.可以点击空白处: click(scenes.可以点击空白处.空白处),
-        }
-        done = False
+    def __goto(self, target: scenes.Scenes, actions: list[scenes.Action]):
         while True:
-            if done:
-                break
-            s = WhichScenes(self.Screen())
-            for k, v in actions.items():
-                if s == k:
-                    if s == scenes.小组大厅:
-                        done = True
-                    v()
-                    break
+            c = self.CurrentScene()
+            if c == scenes.Unknow:
+                self.UnknowLoop()
+                continue
+            for a in actions:
+                self.__doAction(a)
+
+    def UnknowLoop(self):
+        self.Click(scenes.Unknow.空白处)
+        time.sleep(1)
+
+    def Goto(self, s: scenes.Scenes):
+        s = self.CurrentScene()
+        while True:
+            if s == scenes.Unknow:
+                self.UnknowLoop()
+                s = self.CurrentScene()
+                continue
+            break
+
+        path = self.grap.FindPath(s, s)
+        if path is None:
+            raise Exception("no path")
+        actions = self.grap.FindActions(path)
+        for i in range(len(path)):
+            self.__goto(path[i], actions[i])
