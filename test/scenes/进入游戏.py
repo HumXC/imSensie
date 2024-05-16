@@ -9,5 +9,5 @@ def test():
     t = TestDrives(s)
 
     assert s.IsLike(e)
-    t.Click(e.Start())
+    t.Click(e.空白处)
     t.Show()

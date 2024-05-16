@@ -81,7 +81,7 @@ class Image:
         """
         preprocessFunc 是预处理函数，将在 __init__ 内调用
         """
-        if type(image) == bytes:
+        if isinstance(image, bytes):
             image_array = np.frombuffer(image, np.uint8)
             self.src = cv2.imdecode(image_array, flag)
         else:

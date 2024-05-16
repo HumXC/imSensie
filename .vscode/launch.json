@@ -33,6 +33,16 @@
             "request": "launch",
             "program": "./tests.py",
             "console": "integratedTerminal"
+        },
+        {
+            "env": {
+                "LD_LIBRARY_PATH": "${env:NIX_LD_LIBRARY_PATH}"
+            },
+            "name": "Main",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "./main.py",
+            "console": "integratedTerminal"
         }
     ]
 }

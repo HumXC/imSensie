@@ -1,5 +1,5 @@
 import cv2
-from ba.element import Point, Screen
+from ba.element import Clickable, Screen
 
 
 class TestDrives:
@@ -12,7 +12,7 @@ class TestDrives:
     def Show(self):
         self.screen.src.Show()
 
-    def Click(self, c: Point):
+    def Click(self, c: Clickable):
         # self.screen.src.Circle(c, 3, (255, 0, 0))
 
         point = (250, 250)
