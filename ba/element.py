@@ -14,26 +14,33 @@ class Likeable(Protocol):
     def Like(self, templ: Image) -> bool: ...
 
 
-class Element(Preprocessor, Likeable): ...
+class Element_(Preprocessor, Likeable): ...
 
 
 class ActionType(enum.Enum):
     CLICK = "click"
+    ELEMENT_CLIEK = "element_click"
 
 
 class Action:
     type: ActionType
+    name: str = "Unknown"
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class ClickAction(Action, tuple[int, int]):
-    def __new__(cls, x: int, y: int):
-        return super().__new__(cls, (x, y))
+    type = ActionType.CLICK
 
-    def __init__(self, x: int, y: int) -> None:
-        self.type = ActionType.CLICK
+    def __new__(cls, name: str, x: int, y: int):
+        s = super().__new__(cls, (x, y))
+        s.name = name
+        return s
 
 
-class ElementClickAction(ClickAction, Element): ...
+class ElementClickAction(ClickAction, Element_):
+    type: ActionType = ActionType.ELEMENT_CLIEK
 
 
 class Screen:
