@@ -14,7 +14,7 @@ class Likeable(Protocol):
     def Like(self, templ: Image) -> bool: ...
 
 
-class Element_(Preprocessor, Likeable): ...
+class Element(Preprocessor, Likeable): ...
 
 
 class ActionType(enum.Enum):
@@ -39,7 +39,7 @@ class ClickAction(Action, tuple[int, int]):
         return s
 
 
-class ElementClickAction(ClickAction, Element_):
+class ElementClickAction(ClickAction, Element):
     type: ActionType = ActionType.ELEMENT_CLIEK
 
 

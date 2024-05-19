@@ -1,6 +1,8 @@
 from ba import scenes
-from ba.scenes import Edge
-from test import scenes as tscenes
+from ba.scenes import Edge, Graph
+from test import scenes as tscenes, testing
+
+testing.IsShowImage = False
 
 
 def testScenes():
@@ -17,8 +19,12 @@ def testScenes():
     tscenes.小组大厅.test()
     tscenes.小组大厅_签到奖励.test()
     tscenes.登录_更新提醒.test()
+    tscenes.邮箱.test()
 
 
-# testScenes()
+testScenes()
 # tscenes.咖啡厅_收益.test()
-tscenes.登录_更新提醒.test()
+# tscenes.登录_更新提醒.test()
+# tscenes.邮箱.test()
+
+Graph().Draw("MiSans", "graph.png")

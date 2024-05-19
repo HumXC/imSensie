@@ -78,7 +78,10 @@ class Game:
             self.Click(cast(element.ClickAction, a))
 
     def __goto(
-        self, frome: scenes.Scenes, to: scenes.Scenes, actions: list[scenes.Action]
+        self,
+        frome: element.Element,
+        to: element.Element,
+        actions: list[scenes.Action],
     ) -> bool:
         while True:
             c = self.CurrentScene()
@@ -95,7 +98,7 @@ class Game:
             else:
                 return False
 
-    def Goto(self, s: scenes.Scenes) -> bool:
+    def Goto(self, s: element.Element) -> bool:
         while True:
             cs = self.CurrentScene()
             if cs == scenes.Unknow:

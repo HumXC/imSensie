@@ -1,6 +1,6 @@
 import cv2
 from ba.element import ClickAction, Screen
-from ba.scenes import All, Scenes
+from ba.scenes import All, BaseElement
 
 IsShowImage = False
 
@@ -15,9 +15,7 @@ class TestDrives:
     def Show(self):
         if not IsShowImage:
             return
-        wait, destry = self.screen.src.Show()
-        wait()
-        destry()
+        self.screen.src.Show()[0]()
 
     def Click(self, c: ClickAction):
         self.step += 1
@@ -58,7 +56,7 @@ class TestDrives:
         )
 
 
-def AssertScene(s: Screen, e: Scenes):
+def AssertScene(s: Screen, e: BaseElement):
     for i in All:
         if i == e:
             assert s.IsLike(i)

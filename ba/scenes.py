@@ -1,15 +1,15 @@
+import random
 from typing import Iterable, cast
 
 import cv2
 from ba import images
 from ba.cv import Image
-from ba.element import Action, ClickAction, ElementClickAction, Element_
+from ba.element import Action, ClickAction, ElementClickAction, Element as Element
 from ba.page import graph
 
 
-class Scenes(Element_):
+class BaseElement(Element):
     name: str
-    src: Image
 
     def __str__(self) -> str:
         return self.name
@@ -21,19 +21,16 @@ class Scenes(Element_):
         raise NotImplementedError()
 
 
-Element = Scenes
-
-
 class 可以点击空白处:
-    空白处: ClickAction = ClickAction("空白处", 1, 1)
+    空白处 = ClickAction("空白处", 1, 1)
 
 
 class 具有返回和主页按钮:
-    返回: ClickAction = ClickAction("返回", 156, 46)
-    大厅: ClickAction = ClickAction("大厅", 1785, 31)
+    返回 = ClickAction("返回", 156, 46)
+    大厅 = ClickAction("大厅", 1785, 31)
 
 
-class __Unknow(可以点击空白处, Scenes):
+class __Unknow(可以点击空白处, BaseElement):
     def __init__(self) -> None:
         return
 
@@ -44,7 +41,7 @@ class __Unknow(可以点击空白处, Scenes):
         return True
 
 
-class __登录_通知(可以点击空白处, Scenes):
+class __登录_通知(可以点击空白处, BaseElement):
     name = "登录_通知"
     icon16plus: Image
     title: Image
@@ -66,20 +63,20 @@ class __登录_通知(可以点击空白处, Scenes):
         ) and self.title.MatchTemplate(title).IsMax(0.95)
 
 
-class __登录_进入游戏(可以点击空白处, Scenes):
+class __登录_进入游戏(可以点击空白处, BaseElement):
     name = "登录_进入游戏"
 
     def __init__(self) -> None:
         self.src = self.Preprocessing(images.get("登录_进入游戏"))
 
     def Preprocessing(self, image: Image) -> Image:
-        return image.CvtGray().Crop((96, 994, 125, 68))
+        return image.Crop((96, 994, 125, 68))
 
     def Like(self, image: Image) -> bool:
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
-class __登录_更新提醒(Scenes):
+class __登录_更新提醒(BaseElement):
     name = "登录_更新提醒"
     确认 = ClickAction("确认", 1138, 728)
 
@@ -93,17 +90,17 @@ class __登录_更新提醒(Scenes):
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
-class __大厅(Scenes):
+class __大厅(BaseElement):
     name = "大厅"
-    工作任务: ClickAction = ClickAction("工作任务", 156, 315)
-    邮箱: ClickAction = ClickAction("邮箱", 1655, 56)
-    全屏大厅: ClickAction = ClickAction("全屏大厅", 1772, 129)
-    咖啡厅: ClickAction = ClickAction("咖啡厅", 197, 1000)
-    日程: ClickAction = ClickAction("日程", 360, 1000)
-    成员: ClickAction = ClickAction("成员", 525, 1000)
-    小组: ClickAction = ClickAction("小组", 856, 1000)
-    商店: ClickAction = ClickAction("商店", 1174, 1000)
-    业务区: ClickAction = ClickAction("业务区", 1736, 875)
+    工作任务 = ClickAction("工作任务", 156, 315)
+    邮箱 = ClickAction("邮箱", 1655, 56)
+    全屏大厅 = ClickAction("全屏大厅", 1772, 129)
+    咖啡厅 = ClickAction("咖啡厅", 197, 1000)
+    日程 = ClickAction("日程", 360, 1000)
+    成员 = ClickAction("成员", 525, 1000)
+    小组 = ClickAction("小组", 856, 1000)
+    商店 = ClickAction("商店", 1174, 1000)
+    业务区 = ClickAction("业务区", 1736, 875)
 
     def __init__(self) -> None:
         self.src = self.Preprocessing(images.get("大厅"))
@@ -115,10 +112,10 @@ class __大厅(Scenes):
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
-class __工作任务(具有返回和主页按钮, Scenes):
+class __工作任务(具有返回和主页按钮, BaseElement):
     name = "工作任务"
 
-    class __一键领取(ElementClickAction, Element):
+    class __一键领取(ElementClickAction, BaseElement):
         def __new__(cls):
             return ElementClickAction.__new__(cls, "一键领取", 1670, 1008)
 
@@ -131,7 +128,7 @@ class __工作任务(具有返回和主页按钮, Scenes):
         def Like(self, image: Image) -> bool:
             return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
-    class __领取(ElementClickAction, Element):
+    class __领取(ElementClickAction, BaseElement):
         def __new__(cls):
             return ElementClickAction.__new__(cls, "领取", 1419, 1003)
 
@@ -144,33 +141,33 @@ class __工作任务(具有返回和主页按钮, Scenes):
         def Like(self, image: Image) -> bool:
             return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
-    一键领取: ElementClickAction = __一键领取()
-    领取: ElementClickAction = __领取()
+    一键领取 = __一键领取()
+    领取 = __领取()
 
     def __init__(self) -> None:
         self.src = self.Preprocessing(images.get("工作任务"))
 
     def Preprocessing(self, image: Image) -> Image:
-        return image.CvtGray().Crop((210, 3, 171, 61))
+        return image.Crop((210, 3, 171, 61)).CvtColor(cv2.COLOR_BGR2HLS).Apply()
 
     def Like(self, image: Image) -> bool:
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
-class __小组大厅(具有返回和主页按钮, Scenes):
+class __小组大厅(具有返回和主页按钮, BaseElement):
     name = "小组大厅"
 
     def __init__(self) -> None:
         self.src = self.Preprocessing(images.get("小组大厅"))
 
     def Preprocessing(self, image: Image) -> Image:
-        return image.CvtGray().Crop((210, 3, 171, 61))
+        return image.Crop((210, 3, 171, 61)).CvtColor(cv2.COLOR_BGR2HLS).Apply()
 
     def Like(self, image: Image) -> bool:
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
-class __小组大厅_签到奖励(可以点击空白处, Scenes):
+class __小组大厅_签到奖励(可以点击空白处, BaseElement):
     name = "小组大厅_签到奖励"
 
     def __init__(self) -> None:
@@ -183,7 +180,7 @@ class __小组大厅_签到奖励(可以点击空白处, Scenes):
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
-class __获得奖励(可以点击空白处, Scenes):
+class __获得奖励(可以点击空白处, BaseElement):
     name = "获得奖励"
 
     def __init__(self) -> None:
@@ -202,7 +199,7 @@ class __获得奖励(可以点击空白处, Scenes):
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.8)
 
 
-class __好感等级提升(可以点击空白处, Scenes):
+class __好感等级提升(可以点击空白处, BaseElement):
     name = "好感等级提升"
 
     def __init__(self) -> None:
@@ -215,7 +212,7 @@ class __好感等级提升(可以点击空白处, Scenes):
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.8)
 
 
-class __大厅_全屏(Scenes):
+class __大厅_全屏(BaseElement):
     name = "大厅_全屏"
     退出全屏 = ClickAction("退出全屏", 1770, 50)
 
@@ -229,10 +226,10 @@ class __大厅_全屏(Scenes):
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
-class __咖啡厅(具有返回和主页按钮, Scenes):
+class __咖啡厅(具有返回和主页按钮, BaseElement):
     name = "咖啡厅"
 
-    class __邀请劵(ElementClickAction, Element):
+    class __邀请劵(ElementClickAction, BaseElement):
         def __new__(cls):
             return ElementClickAction.__new__(cls, "邀请劵", 1227, 981)
 
@@ -245,7 +242,7 @@ class __咖啡厅(具有返回和主页按钮, Scenes):
         def Like(self, image: Image) -> bool:
             return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
-    class __收益(ElementClickAction, Element):
+    class __收益(ElementClickAction, BaseElement):
         def __new__(cls):
             return ElementClickAction.__new__(cls, "收益", 1665, 965)
 
@@ -265,13 +262,13 @@ class __咖啡厅(具有返回和主页按钮, Scenes):
         self.src = self.Preprocessing(images.get("咖啡厅"))
 
     def Preprocessing(self, image: Image) -> Image:
-        return image.CvtGray().Crop((215, 1, 276, 58))
+        return image.Crop((215, 1, 276, 58)).CvtColor(cv2.COLOR_BGR2HLS).Apply()
 
     def Like(self, image: Image) -> bool:
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
-class __咖啡厅_说明(可以点击空白处, Scenes):
+class __咖啡厅_说明(可以点击空白处, BaseElement):
     name = "咖啡厅_说明"
     title: Image
     subTitle: Image
@@ -293,10 +290,10 @@ class __咖啡厅_说明(可以点击空白处, Scenes):
         ) and self.subTitle.MatchTemplate(subTitle).IsMax(0.95)
 
 
-class __咖啡厅_收益(可以点击空白处, Scenes):
+class __咖啡厅_收益(可以点击空白处, BaseElement):
     name = "咖啡厅_收益"
 
-    class __领取(ElementClickAction, Element):
+    class __领取(ElementClickAction, BaseElement):
         def __new__(cls):
             return ElementClickAction.__new__(cls, "领取", 963, 758)
 
@@ -315,7 +312,35 @@ class __咖啡厅_收益(可以点击空白处, Scenes):
         self.src = self.Preprocessing(images.get("咖啡厅_收益"))
 
     def Preprocessing(self, image: Image) -> Image:
-        return image.CvtGray().Crop((803, 220, 317, 65))
+        return image.Crop((803, 220, 317, 65))
+
+    def Like(self, image: Image) -> bool:
+        return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
+
+
+class __邮箱(具有返回和主页按钮, BaseElement):
+    name = "邮箱"
+
+    class __一键领取(ElementClickAction, BaseElement):
+        def __new__(cls):
+            return ElementClickAction.__new__(cls, "一键领取", 1648, 1006)
+
+        def __init__(self):
+            self.src = self.Preprocessing(images.get("邮箱"))
+
+        def Preprocessing(self, image: Image) -> Image:
+            return image.CvtGray().Crop((1534, 969, 221, 81))
+
+        def Like(self, image: Image) -> bool:
+            return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
+
+    一键领取 = __一键领取()
+
+    def __init__(self) -> None:
+        self.src = self.Preprocessing(images.get("邮箱"))
+
+    def Preprocessing(self, image: Image) -> Image:
+        return image.Crop((197, 0, 126, 62)).CvtColor(cv2.COLOR_BGR2HLS).Apply()
 
     def Like(self, image: Image) -> bool:
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
@@ -336,8 +361,8 @@ Unknow = __Unknow()
 咖啡厅 = __咖啡厅()
 咖啡厅_收益 = __咖啡厅_收益()
 咖啡厅_说明 = __咖啡厅_说明()
-
-All: list[Scenes] = [
+邮箱 = __邮箱()
+All: list[BaseElement] = [
     获得奖励,
     登录_通知,
     登录_进入游戏,
@@ -351,17 +376,18 @@ All: list[Scenes] = [
     咖啡厅_收益,
     咖啡厅_说明,
     登录_更新提醒,
+    邮箱,
 ]
 
 
 class Edge:
-    frome: Scenes
-    to: Scenes
+    frome: Element
+    to: Element
 
     def __hash__(self) -> int:
         return (str(self.frome) + str(self.to)).__hash__()
 
-    def __init__(self, frome: Scenes, to: Scenes) -> None:
+    def __init__(self, frome: Element, to: Element) -> None:
         self.frome = frome
         self.to = to
 
@@ -373,20 +399,22 @@ class Edge:
 
 
 class Graph:
-    graph: dict[Scenes, list[Scenes]] = {
+    graph: dict[Element, list[Element]] = {
         登录_进入游戏: [大厅],
         大厅: [
             小组大厅,
             工作任务,
             大厅_全屏,
             咖啡厅,
+            邮箱,
         ],
         小组大厅: [大厅],
-        工作任务: [大厅],
+        工作任务: [大厅, 获得奖励],
         大厅_全屏: [大厅],
         咖啡厅: [大厅, 咖啡厅_收益],
-        咖啡厅_收益: [咖啡厅],
+        咖啡厅_收益: [咖啡厅, 获得奖励],
         咖啡厅_说明: [咖啡厅],
+        邮箱: [获得奖励],
     }
     actions: dict[Edge, list[Action]] = {
         Edge(登录_进入游戏, 大厅): [登录_进入游戏.空白处],
@@ -395,18 +423,23 @@ class Graph:
         Edge(大厅, 大厅_全屏): [大厅.全屏大厅],
         Edge(大厅, 咖啡厅): [大厅.咖啡厅],
         Edge(大厅, 咖啡厅_说明): [大厅.咖啡厅],
+        Edge(大厅, 邮箱): [大厅.邮箱],
         Edge(大厅_全屏, 大厅): [大厅_全屏.退出全屏],
         Edge(小组大厅, 大厅): [小组大厅.返回],
         Edge(工作任务, 大厅): [工作任务.返回],
+        Edge(工作任务, 获得奖励): [工作任务.一键领取, 工作任务.领取],
         Edge(咖啡厅, 大厅): [咖啡厅.返回],
         Edge(咖啡厅, 咖啡厅_收益): [咖啡厅.收益],
         Edge(咖啡厅_收益, 咖啡厅): [咖啡厅_收益.空白处],
+        Edge(咖啡厅_收益, 获得奖励): [咖啡厅_收益.领取],
         Edge(咖啡厅_说明, 咖啡厅): [咖啡厅_说明.空白处],
+        Edge(邮箱, 获得奖励): [邮箱.一键领取],
     }
 
     def Draw(self, chineseFont: str, file: str):
         import matplotlib.pyplot as plt
         import networkx as nx
+        import numpy as np
 
         G = nx.DiGraph()
         for vertex in self.graph:
@@ -414,7 +447,7 @@ class Graph:
         for from_vertex in self.graph:
             for to_vertex in self.graph[from_vertex]:
                 G.add_edge(from_vertex, to_vertex)
-
+        plt.figure(figsize=(12, 8))
         pos = nx.spring_layout(G)
         cf = plt.gcf()
         cf.set_facecolor("w")
@@ -425,12 +458,31 @@ class Graph:
 
         edgeLabels = {}
         for a in self.actions:
-            lsbel = ""
+            label = ""
             for action in self.actions[a]:
-                lsbel = action.type.value + ":" + str(action)
-            edgeLabels[(a.frome, a.to)] = lsbel
+                label += "\n" + action.type.value + ":" + str(action)
+            label = label[1:]
+            edgeLabels[(a.frome, a.to)] = label
+        colors = [
+            "blue",
+            "green",
+            "red",
+            "cyan",
+            "magenta",
+            "black",
+            "darkblue",
+            "darkgreen",
+            "darkred",
+            "purple",
+            "brown",
+            "black",
+            "teal",
+            "gray",
+        ]
+
         for from_vertex in self.graph:
             for to_vertex in self.graph[from_vertex]:
+                color = random.choice(colors)
                 rad = 0.3
                 connectionstyle = f"arc3,rad={rad if (from_vertex, to_vertex) in edgeLabels and (to_vertex, from_vertex) in edgeLabels else 0}"
                 label = edgeLabels[(from_vertex, to_vertex)]
@@ -439,24 +491,25 @@ class Graph:
                     pos,
                     edgelist=[(from_vertex, to_vertex)],
                     arrowstyle="-|>",
-                    style="solid",
+                    style="dashed",
                     connectionstyle=connectionstyle,
-                    edge_color="black",
+                    edge_color=color,
                     arrowsize=20,
                     min_target_margin=15,
                     node_size=3000,
+                    edge_vmin=100,
                 )[0]
                 # 计算曲线边的中点
                 path = arrow.get_path()
                 path_transform = arrow.get_transform()
-                path_data = path.interpolated(100).vertices
-                midpoint = path_data[len(path_data) // 6]
-                # 添加边的标签
+                path_data = path.interpolated(200).vertices
+                midpoint = path_data[len(path_data) // 5]
+
                 plt.text(
                     midpoint[0],
                     midpoint[1],
                     label,
-                    color="red",
+                    color=color,
                     ha="center",
                     va="center",
                     fontsize=8,
@@ -466,8 +519,8 @@ class Graph:
 
         plt.savefig(file)
 
-    def FindPath(self, frome: Scenes, to: Scenes) -> list[Scenes] | None:
-        def dfs(start: Scenes, end: Scenes, path: list[Scenes]):
+    def FindPath(self, frome: Element, to: Element) -> list[Element] | None:
+        def dfs(start: Element, end: Element, path: list[Element]):
             if start == end:
                 return path
             for node in self.graph[start]:
@@ -479,7 +532,7 @@ class Graph:
 
         return dfs(frome, to, [frome])
 
-    def FindActions(self, path: list[Scenes]) -> list[list[Action]]:
+    def FindActions(self, path: list[Element]) -> list[list[Action]]:
         result = []
         for i in range(len(path) - 1):
             edge = Edge(path[i], path[i + 1])
