@@ -346,6 +346,69 @@ class __邮箱(具有返回和主页按钮, BaseElement):
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
+class __业务区(具有返回和主页按钮, BaseElement):
+    name = "业务区"
+    任务 = ClickAction("任务", 1201, 414)
+    故事 = ClickAction("故事", 1591, 410)
+    悬赏通缉 = ClickAction("悬赏通缉", 1100, 631)
+    特别委托 = ClickAction("特别委托", 1071, 744)
+    学院交流会 = ClickAction("学院交流会", 1064, 858)
+    总力战 = ClickAction("总力战", 1064, 858)
+    战术综合测试 = ClickAction("战术综合测试", 1321, 838)
+    战术对抗赛 = ClickAction("战术对抗赛", 1591, 754)
+
+    def __init__(self) -> None:
+        self.src = self.Preprocessing(images.get("业务区"))
+
+    def Preprocessing(self, image: Image) -> Image:
+        return image.Crop((211, 3, 135, 58)).CvtColor(cv2.COLOR_BGR2HLS).Apply()
+
+    def Like(self, image: Image) -> bool:
+        return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
+
+
+class __战术对抗赛(具有返回和主页按钮, BaseElement):
+    name = "战术对抗赛"
+
+    class __时间奖励(ElementClickAction, BaseElement):
+        def __new__(cls):
+            return ElementClickAction.__new__(cls, "时间奖励", 558, 585)
+
+        def __init__(self):
+            self.src = self.Preprocessing(images.get("战术对抗赛"))
+
+        def Preprocessing(self, image: Image) -> Image:
+            return image.CvtGray().Crop((478, 525, 171, 97))
+
+        def Like(self, image: Image) -> bool:
+            return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
+
+    class __每日奖励(ElementClickAction, BaseElement):
+        def __new__(cls):
+            return ElementClickAction.__new__(cls, "每日奖励", 558, 686)
+
+        def __init__(self):
+            self.src = self.Preprocessing(images.get("战术对抗赛"))
+
+        def Preprocessing(self, image: Image) -> Image:
+            return image.CvtGray().Crop((482, 644, 162, 83))
+
+        def Like(self, image: Image) -> bool:
+            return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
+
+    时间奖励 = __时间奖励()
+    每日奖励 = __每日奖励()
+
+    def __init__(self) -> None:
+        self.src = self.Preprocessing(images.get("战术对抗赛"))
+
+    def Preprocessing(self, image: Image) -> Image:
+        return image.Crop((211, 3, 135, 58)).CvtColor(cv2.COLOR_BGR2HLS).Apply()
+
+    def Like(self, image: Image) -> bool:
+        return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
+
+
 Unknow = __Unknow()
 
 登录_通知 = __登录_通知()
@@ -362,6 +425,8 @@ Unknow = __Unknow()
 咖啡厅_收益 = __咖啡厅_收益()
 咖啡厅_说明 = __咖啡厅_说明()
 邮箱 = __邮箱()
+业务区 = __业务区()
+战术对抗赛 = __战术对抗赛()
 All: list[BaseElement] = [
     获得奖励,
     登录_通知,
@@ -377,6 +442,8 @@ All: list[BaseElement] = [
     咖啡厅_说明,
     登录_更新提醒,
     邮箱,
+    业务区,
+    战术对抗赛,
 ]
 
 
@@ -407,6 +474,7 @@ class Graph:
             大厅_全屏,
             咖啡厅,
             邮箱,
+            业务区,
         ],
         小组大厅: [大厅],
         工作任务: [大厅, 获得奖励],
@@ -414,7 +482,9 @@ class Graph:
         咖啡厅: [大厅, 咖啡厅_收益],
         咖啡厅_收益: [咖啡厅, 获得奖励],
         咖啡厅_说明: [咖啡厅],
-        邮箱: [获得奖励],
+        邮箱: [大厅, 获得奖励],
+        业务区: [大厅, 战术对抗赛],
+        战术对抗赛: [业务区, 获得奖励, 大厅],
     }
     actions: dict[Edge, list[Action]] = {
         Edge(登录_进入游戏, 大厅): [登录_进入游戏.空白处],
@@ -424,6 +494,7 @@ class Graph:
         Edge(大厅, 咖啡厅): [大厅.咖啡厅],
         Edge(大厅, 咖啡厅_说明): [大厅.咖啡厅],
         Edge(大厅, 邮箱): [大厅.邮箱],
+        Edge(大厅, 业务区): [大厅.业务区],
         Edge(大厅_全屏, 大厅): [大厅_全屏.退出全屏],
         Edge(小组大厅, 大厅): [小组大厅.返回],
         Edge(工作任务, 大厅): [工作任务.返回],
@@ -434,12 +505,17 @@ class Graph:
         Edge(咖啡厅_收益, 获得奖励): [咖啡厅_收益.领取],
         Edge(咖啡厅_说明, 咖啡厅): [咖啡厅_说明.空白处],
         Edge(邮箱, 获得奖励): [邮箱.一键领取],
+        Edge(邮箱, 大厅): [邮箱.返回],
+        Edge(业务区, 大厅): [业务区.返回],
+        Edge(业务区, 战术对抗赛): [业务区.战术对抗赛],
+        Edge(战术对抗赛, 业务区): [战术对抗赛.返回],
+        Edge(战术对抗赛, 获得奖励): [战术对抗赛.每日奖励, 战术对抗赛.时间奖励],
+        Edge(战术对抗赛, 大厅): [战术对抗赛.大厅],
     }
 
     def Draw(self, chineseFont: str, file: str):
         import matplotlib.pyplot as plt
         import networkx as nx
-        import numpy as np
 
         G = nx.DiGraph()
         for vertex in self.graph:
@@ -450,11 +526,11 @@ class Graph:
         plt.figure(figsize=(12, 8))
         pos = nx.spring_layout(G)
         cf = plt.gcf()
-        cf.set_facecolor("w")
+        cf.set_facecolor("black")
         ax = cf.add_axes((0, 0, 1, 1))
         ax.set_axis_off()
-        nx.draw_networkx_nodes(G, pos, ax=ax, node_size=3000, alpha=0.2)
-        nx.draw_networkx_labels(G, pos, font_family=chineseFont)
+        nx.draw_networkx_nodes(G, pos, ax=ax, node_size=3000, alpha=0.5)
+        nx.draw_networkx_labels(G, pos, font_family=chineseFont, font_color="white")
 
         edgeLabels = {}
         for a in self.actions:
@@ -464,20 +540,37 @@ class Graph:
             label = label[1:]
             edgeLabels[(a.frome, a.to)] = label
         colors = [
-            "blue",
-            "green",
-            "red",
-            "cyan",
-            "magenta",
-            "black",
-            "darkblue",
-            "darkgreen",
-            "darkred",
-            "purple",
-            "brown",
-            "black",
-            "teal",
-            "gray",
+            "#1f77b4",
+            "#2ca02c",
+            "#d62728",
+            "#9467bd",
+            "#8c564b",
+            "#e377c2",
+            "#7f7f7f",
+            "#bcbd22",
+            "#17becf",
+            "#ff7f0e",
+            "#393b79",
+            "#637939",
+            "#8c6d31",
+            "#843c39",
+            "#7b4173",
+            "#5254a3",
+            "#6b6ecf",
+            "#9c9ede",
+            "#8ca252",
+            "#b5cf6b",
+            "#cedb9c",
+            "#bd9e39",
+            "#e7ba52",
+            "#e7969c",
+            "#de9ed6",
+            "#ad494a",
+            "#d6616b",
+            "#e7cb94",
+            "#7b4173",
+            "#a55194",
+            "#ce6dbd",
         ]
 
         for from_vertex in self.graph:
@@ -517,7 +610,7 @@ class Graph:
                     font=chineseFont,
                 )
 
-        plt.savefig(file)
+        plt.savefig(file, dpi=600)
 
     def FindPath(self, start: Element, end: Element) -> list[Element] | None:
         queue = deque([[start]])

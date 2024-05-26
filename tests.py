@@ -1,4 +1,5 @@
-from ba import scenes
+from ba import game, scenes
+from ba.element import Screen
 from ba.scenes import Edge, Graph
 from test import scenes as tscenes, testing
 
@@ -20,11 +21,9 @@ def testScenes():
     tscenes.小组大厅_签到奖励.test()
     tscenes.登录_更新提醒.test()
     tscenes.邮箱.test()
+    tscenes.战术对抗赛.test()
+    tscenes.业务区.test()
 
 
 testScenes()
-# tscenes.咖啡厅_收益.test()
-# tscenes.登录_更新提醒.test()
-# tscenes.邮箱.test()
-
 Graph().Draw("MiSans", "graph.png")

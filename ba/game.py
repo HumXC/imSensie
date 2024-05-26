@@ -1,11 +1,11 @@
 import time
-from typing import cast
+from typing import Callable, cast
 
 from cv2.typing import Size
 from shiroko import Client, Importance
 from shiroko.input import Input
 
-from ba import scenes
+from ba import scenes, utils
 from ba import element
 from ba.element import ClickAction
 from ba.cv import Image
@@ -26,6 +26,21 @@ Pkgname = "com.RoamingStar.BlueArchive"
 Activity = "com.yostar.supersdk.activity.YoStarSplashActivity"
 SCREEN_SIZE = (1080, 1920)
 IMAGE_SIZE = (1920, 1080)
+
+RedPoints = [
+    [scenes.大厅.工作任务, (191, 327, 48, 56)],
+    [scenes.大厅.小组, (371, 983, 59, 60)],
+    [scenes.大厅.业务区, (1778, 767, 71, 76)],
+    [scenes.大厅.邮箱, (1686, 3, 48, 57)],
+    [scenes.业务区.战术对抗赛, (1712, 559, 43, 46)],
+    [scenes.业务区.总力战, (1458, 562, 48, 46)],
+]
+YellowPoints = [
+    [scenes.大厅.咖啡厅, (216, 981, 62, 65)],
+    [scenes.业务区.总力战, (1458, 562, 48, 46)],
+    [scenes.业务区.悬赏通缉, (1205, 557, 48, 56)],
+    [scenes.业务区.学院交流会, (1160, 792, 53, 49)],
+]
 
 
 class Game:
@@ -48,6 +63,12 @@ class Game:
     def Screen(self) -> element.Screen:
         self.lastScreen = element.Screen(self.Png())
         return self.lastScreen
+
+    def IfLikeAndDo(self, a: element.ElementActions) -> bool:
+        isLike = self.Screen().IsLike(a)
+        if isLike:
+            self.DoAction(a)
+        return isLike
 
     def Launch(self):
         self.srk.window.SetSize(SCREEN_SIZE[0], SCREEN_SIZE[1])
@@ -86,7 +107,7 @@ class Game:
             result = isLike
             if isLike:
                 self.Click(a)
-        time.sleep(0.2)
+        time.sleep(0.5)
         return result
 
     def Special(self, cs: element.Element) -> bool:
@@ -109,6 +130,7 @@ class Game:
         while True:
             cs = self.CurrentScene()
             if cs == s:
+                time.sleep(0.5)
                 return True
             if self.Special(cs):
                 continue
@@ -119,3 +141,25 @@ class Game:
             for a in action:
                 if not self.DoAction(a):
                     return False
+
+    def __findPoint(
+        self,
+        function: Callable[[Image, Callable[[int, int], bool]], list[tuple[int, int]]],
+    ) -> list[element.Element]:
+        s = self.Screen()
+        result = []
+        pts = function(s.src, lambda x, y: True)
+        for p in pts:
+            for rp in RedPoints:
+                px1, py1 = rp[1][0], rp[1][1]
+                px2, py2 = px1 + rp[1][2], py1 + rp[1][3]
+                if px1 <= p[0] <= px2 and py1 <= p[1] <= py2:
+                    result.append(rp[0])
+                    continue
+        return result
+
+    def FindRedPoint(self) -> list[element.Element]:
+        return self.__findPoint(utils.FindRedPoint)
+
+    def FindYellowPoint(self) -> list[element.Element]:
+        return self.__findPoint(utils.FindYellowPoint)

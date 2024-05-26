@@ -4,10 +4,11 @@ from ..testing import AssertScene, TestDrives
 
 
 def test():
-    s = Screen(images.get("获得奖励"))
-    e = scenes.获得奖励
+    s = Screen(images.get("战术对抗赛"))
+    e = scenes.战术对抗赛
     t = TestDrives(s)
 
     AssertScene(s, e)
-    t.Click(e.继续)
+    t.Click(e.每日奖励)
+    t.Click(e.时间奖励)
     t.Show()
