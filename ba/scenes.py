@@ -29,6 +29,19 @@ class 具有返回和主页按钮:
     大厅 = ClickAction("大厅", 1785, 31)
 
 
+class TitleScenes(具有返回和主页按钮, BaseElement):
+    def __init__(self, name: str, titleArea: tuple[int, int, int, int]) -> None:
+        self.name = name
+        self.__titleArea = titleArea
+        self.src = self.Preprocessing(images.get(name))
+
+    def Preprocessing(self, image: Image) -> Image:
+        return image.Crop(self.__titleArea).CvtColor(cv2.COLOR_BGR2HLS).Apply()
+
+    def Like(self, image: Image) -> bool:
+        return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
+
+
 class __Unknow(可以点击空白处, BaseElement):
     def __init__(self) -> None:
         return
@@ -111,9 +124,7 @@ class __大厅(BaseElement):
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
-class __工作任务(具有返回和主页按钮, BaseElement):
-    name = "工作任务"
-
+class __工作任务(TitleScenes):
     class __一键领取(ElementClickAction, BaseElement):
         def __new__(cls):
             return ElementClickAction.__new__(cls, "一键领取", 1670, 1008)
@@ -144,26 +155,12 @@ class __工作任务(具有返回和主页按钮, BaseElement):
     领取 = __领取()
 
     def __init__(self) -> None:
-        self.src = self.Preprocessing(images.get("工作任务"))
-
-    def Preprocessing(self, image: Image) -> Image:
-        return image.Crop((210, 3, 171, 61)).CvtColor(cv2.COLOR_BGR2HLS).Apply()
-
-    def Like(self, image: Image) -> bool:
-        return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
+        super().__init__("工作任务", (210, 3, 171, 61))
 
 
-class __小组大厅(具有返回和主页按钮, BaseElement):
-    name = "小组大厅"
-
+class __小组大厅(TitleScenes):
     def __init__(self) -> None:
-        self.src = self.Preprocessing(images.get("小组大厅"))
-
-    def Preprocessing(self, image: Image) -> Image:
-        return image.Crop((210, 3, 171, 61)).CvtColor(cv2.COLOR_BGR2HLS).Apply()
-
-    def Like(self, image: Image) -> bool:
-        return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
+        super().__init__("小组大厅", (210, 3, 171, 61))
 
 
 class __小组大厅_签到奖励(可以点击空白处, BaseElement):
@@ -226,9 +223,7 @@ class __大厅_全屏(BaseElement):
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
-class __咖啡厅(具有返回和主页按钮, BaseElement):
-    name = "咖啡厅"
-
+class __咖啡厅(TitleScenes):
     class __邀请劵(ElementClickAction, BaseElement):
         def __new__(cls):
             return ElementClickAction.__new__(cls, "邀请劵", 1227, 981)
@@ -259,13 +254,7 @@ class __咖啡厅(具有返回和主页按钮, BaseElement):
     收益 = __收益()
 
     def __init__(self) -> None:
-        self.src = self.Preprocessing(images.get("咖啡厅"))
-
-    def Preprocessing(self, image: Image) -> Image:
-        return image.Crop((215, 1, 276, 58)).CvtColor(cv2.COLOR_BGR2HLS).Apply()
-
-    def Like(self, image: Image) -> bool:
-        return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
+        super().__init__("咖啡厅", (215, 1, 276, 58))
 
 
 class __咖啡厅_说明(可以点击空白处, BaseElement):
@@ -318,9 +307,7 @@ class __咖啡厅_收益(可以点击空白处, BaseElement):
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
-class __邮箱(具有返回和主页按钮, BaseElement):
-    name = "邮箱"
-
+class __邮箱(TitleScenes):
     class __一键领取(ElementClickAction, BaseElement):
         def __new__(cls):
             return ElementClickAction.__new__(cls, "一键领取", 1648, 1006)
@@ -337,17 +324,10 @@ class __邮箱(具有返回和主页按钮, BaseElement):
     一键领取 = __一键领取()
 
     def __init__(self) -> None:
-        self.src = self.Preprocessing(images.get("邮箱"))
-
-    def Preprocessing(self, image: Image) -> Image:
-        return image.Crop((197, 0, 126, 62)).CvtColor(cv2.COLOR_BGR2HLS).Apply()
-
-    def Like(self, image: Image) -> bool:
-        return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
+        super().__init__("邮箱", (197, 0, 126, 62))
 
 
-class __业务区(具有返回和主页按钮, BaseElement):
-    name = "业务区"
+class __业务区(TitleScenes):
     任务 = ClickAction("任务", 1201, 414)
     故事 = ClickAction("故事", 1591, 410)
     悬赏通缉 = ClickAction("悬赏通缉", 1100, 631)
@@ -358,18 +338,10 @@ class __业务区(具有返回和主页按钮, BaseElement):
     战术对抗赛 = ClickAction("战术对抗赛", 1591, 754)
 
     def __init__(self) -> None:
-        self.src = self.Preprocessing(images.get("业务区"))
-
-    def Preprocessing(self, image: Image) -> Image:
-        return image.Crop((211, 3, 135, 58)).CvtColor(cv2.COLOR_BGR2HLS).Apply()
-
-    def Like(self, image: Image) -> bool:
-        return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
+        super().__init__("业务区", (215, 1, 276, 58))
 
 
-class __战术对抗赛(具有返回和主页按钮, BaseElement):
-    name = "战术对抗赛"
-
+class __战术对抗赛(TitleScenes):
     class __时间奖励(ElementClickAction, BaseElement):
         def __new__(cls):
             return ElementClickAction.__new__(cls, "时间奖励", 558, 585)
@@ -400,13 +372,7 @@ class __战术对抗赛(具有返回和主页按钮, BaseElement):
     每日奖励 = __每日奖励()
 
     def __init__(self) -> None:
-        self.src = self.Preprocessing(images.get("战术对抗赛"))
-
-    def Preprocessing(self, image: Image) -> Image:
-        return image.Crop((211, 3, 135, 58)).CvtColor(cv2.COLOR_BGR2HLS).Apply()
-
-    def Like(self, image: Image) -> bool:
-        return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
+        super().__init__("战术对抗赛", (211, 3, 135, 58))
 
 
 Unknow = __Unknow()
