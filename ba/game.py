@@ -32,6 +32,7 @@ class Game:
     srk: Client
     input: Input
     grap: scenes.Graph
+    lastScreen: element.Screen
 
     def __init__(self, srk: Client) -> None:
         self.srk = srk
@@ -45,7 +46,8 @@ class Game:
         return img
 
     def Screen(self) -> element.Screen:
-        return element.Screen(self.Png())
+        self.lastScreen = element.Screen(self.Png())
+        return self.lastScreen
 
     def Launch(self):
         self.srk.window.SetSize(SCREEN_SIZE[0], SCREEN_SIZE[1])
@@ -73,51 +75,47 @@ class Game:
                 return e
         return scenes.Unknow
 
-    def __doAction(self, a: scenes.Action):
+    def DoAction(self, a: scenes.Action) -> bool:
+        result = False
         if a.type == element.ActionType.CLICK:
+            result = True
             self.Click(cast(element.ClickAction, a))
+        elif a.type == element.ActionType.ELEMENT_CLIEK:
+            a = cast(element.ElementClickAction, a)
+            isLike = self.lastScreen.IsLike(a)
+            result = isLike
+            if isLike:
+                self.Click(a)
+        time.sleep(0.2)
+        return result
 
-    def __goto(
-        self,
-        frome: element.Element,
-        to: element.Element,
-        actions: list[scenes.Action],
-    ) -> bool:
-        while True:
-            c = self.CurrentScene()
-            if c == to:
-                return True
-            if c == frome:
-                for a in actions:
-                    self.__doAction(a)
-                continue
-            if c == scenes.Unknow:
-                self.Click(scenes.Unknow.空白处)
-                time.sleep(1)
-                continue
-            else:
-                return False
+    def Special(self, cs: element.Element) -> bool:
+        if cs == scenes.Unknow:
+            self.Click(scenes.Unknow.空白处)
+            time.sleep(1)
+            return True
+        if cs == scenes.登录_更新提醒:
+            cs = self.CurrentScene()
+            self.Click(scenes.登录_更新提醒.确认)
+            time.sleep(1)
+            return True
+        if cs == scenes.获得奖励:
+            print("获得奖励")
+            self.Click(scenes.获得奖励.继续)
+            return True
+        return False
 
     def Goto(self, s: element.Element) -> bool:
         while True:
             cs = self.CurrentScene()
-            if cs == scenes.Unknow:
-                self.Click(scenes.Unknow.空白处)
-                time.sleep(1)
-                cs = self.CurrentScene()
+            if cs == s:
+                return True
+            if self.Special(cs):
                 continue
-            if cs == scenes.登录_更新提醒:
-                cs = self.CurrentScene()
-                self.Click(scenes.登录_更新提醒.确认)
-                time.sleep(1)
-                continue
-
             path = self.grap.FindPath(cs, s)
             if path is None:
                 raise Exception("no path")
-            actions = self.grap.FindActions(path)
-            for i in range(len(path)):
-                if not self.__goto(cs, path[i], actions[i]):
+            action = self.grap.FindActions(path[:2])[0]
+            for a in action:
+                if not self.DoAction(a):
                     return False
-                cs = self.CurrentScene()
-            return True

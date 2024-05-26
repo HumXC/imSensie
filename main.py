@@ -18,6 +18,10 @@ def main():
     game.Goto(scenes.工作任务)
     if game.Screen().IsLike(scenes.工作任务.一键领取):
         game.Click(scenes.工作任务.一键领取)
+    game.Goto(scenes.咖啡厅_收益)
+    if game.Screen().IsLike(scenes.咖啡厅_收益.领取):
+        game.Click(scenes.咖啡厅_收益.领取)
+    game.Goto(scenes.大厅_全屏)
     srk.window.ResetSize()
     print("Done")
 

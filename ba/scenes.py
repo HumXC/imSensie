@@ -1,11 +1,10 @@
 import random
-from typing import Iterable, cast
-
+from typing import cast
+from collections import deque
 import cv2
 from ba import images
 from ba.cv import Image
 from ba.element import Action, ClickAction, ElementClickAction, Element as Element
-from ba.page import graph
 
 
 class BaseElement(Element):
@@ -180,8 +179,9 @@ class __小组大厅_签到奖励(可以点击空白处, BaseElement):
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
-class __获得奖励(可以点击空白处, BaseElement):
+class __获得奖励(BaseElement):
     name = "获得奖励"
+    继续 = ClickAction("继续", 968, 957)
 
     def __init__(self) -> None:
         self.src = self.Preprocessing(images.get("获得奖励"))
@@ -519,18 +519,25 @@ class Graph:
 
         plt.savefig(file)
 
-    def FindPath(self, frome: Element, to: Element) -> list[Element] | None:
-        def dfs(start: Element, end: Element, path: list[Element]):
-            if start == end:
-                return path
-            for node in self.graph[start]:
-                if node not in path:
-                    result = dfs(node, end, path + [node])
-                    if result is not None:
-                        return result
-            return None
+    def FindPath(self, start: Element, end: Element) -> list[Element] | None:
+        queue = deque([[start]])
+        visited = set()
 
-        return dfs(frome, to, [frome])
+        while queue:
+            path = queue.popleft()
+            node = path[-1]
+
+            if node == end:
+                return path
+
+            if node not in visited:
+                visited.add(node)
+                for neighbor in self.graph.get(node, []):
+                    new_path = list(path)
+                    new_path.append(neighbor)
+                    queue.append(new_path)
+
+        return None
 
     def FindActions(self, path: list[Element]) -> list[list[Action]]:
         result = []

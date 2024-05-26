@@ -1,7 +1,5 @@
 import enum
-from typing import Callable, Iterable, Protocol, cast
-
-import cv2
+from typing import Protocol, cast
 
 from ba.cv import Image
 
