@@ -7,7 +7,7 @@ from shiroko.input import Input
 
 from ba import scenes, utils
 from ba import element
-from ba.element import ClickAction
+from ba.element import ClickAction, Likeable, Ocrable
 from ba.cv import Image
 
 
@@ -47,7 +47,7 @@ class Game:
     srk: Client
     input: Input
     grap: scenes.Graph
-    lastScreen: element.Screen
+    LastScreen: element.Screen
 
     def __init__(self, srk: Client) -> None:
         self.srk = srk
@@ -61,8 +61,8 @@ class Game:
         return img
 
     def Screen(self) -> element.Screen:
-        self.lastScreen = element.Screen(self.Png())
-        return self.lastScreen
+        self.LastScreen = element.Screen(self.Png())
+        return self.LastScreen
 
     def IfLikeAndDo(self, a: element.ElementActions) -> bool:
         isLike = self.Screen().IsLike(a)
@@ -96,19 +96,22 @@ class Game:
                 return e
         return scenes.Unknow
 
-    def DoAction(self, a: scenes.Action) -> bool:
+    def DoAction(self, a: scenes.Action) -> tuple[bool, str]:
         result = False
+        msg = ""
         if a.type == element.ActionType.CLICK:
             result = True
             self.Click(cast(element.ClickAction, a))
         elif a.type == element.ActionType.ELEMENT_CLIEK:
             a = cast(element.ElementClickAction, a)
-            isLike = self.lastScreen.IsLike(a)
+            isLike = self.LastScreen.IsLike(a)
             result = isLike
             if isLike:
                 self.Click(a)
+            else:
+                msg = f"screen not like element [{a.name}]"
         time.sleep(0.5)
-        return result
+        return result, msg
 
     def Special(self, cs: element.Element) -> bool:
         if cs == scenes.Unknow:
@@ -126,12 +129,12 @@ class Game:
             return True
         return False
 
-    def Goto(self, s: element.Element) -> bool:
+    def Goto(self, s: element.Element) -> tuple[bool, str]:
         while True:
             cs = self.CurrentScene()
             if cs == s:
                 time.sleep(0.5)
-                return True
+                return True, ""
             if self.Special(cs):
                 continue
             path = self.grap.FindPath(cs, s)
@@ -139,8 +142,20 @@ class Game:
                 raise Exception("no path")
             action = self.grap.FindActions(path[:2])[0]
             for a in action:
-                if not self.DoAction(a):
-                    return False
+                ok, msg = self.DoAction(a)
+                if not ok:
+                    return False, msg
+
+    def Wait(self, scene: Likeable, count: int = -1) -> bool:
+        while count > 0 or count < 0:
+            if self.CurrentScene() == scene:
+                return True
+            time.sleep(1)
+            count -= 1
+        return False
+
+    def Ocr(self, ocrable: Ocrable) -> str:
+        return ocrable.Ocr(self.Screen().src)
 
     def __findPoint(
         self,

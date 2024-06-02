@@ -1,4 +1,5 @@
 import cv2
+from ba import images
 from ba.element import ClickAction, Screen
 from ba.scenes import All, BaseElement
 

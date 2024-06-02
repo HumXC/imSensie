@@ -10,12 +10,44 @@ import numpy as np
 from PIL import Image as PILImage
 
 
+def NonMaxSuppression(
+    points: list[tuple[int, int]], scores, threshold: float
+) -> list[tuple[int, int]]:
+    if len(points) == 0:
+        return []
+
+    # 将点和得分按得分从高到低排序
+    idxs = np.argsort(scores)[::-1]
+    sorted_points = [points[i] for i in idxs]
+
+    suppressed = [False] * len(points)
+    result = []
+
+    for i in range(len(sorted_points)):
+        if suppressed[i]:
+            continue
+        result.append(sorted_points[i])
+        for j in range(i + 1, len(sorted_points)):
+            if (
+                not suppressed[j]
+                and np.linalg.norm(
+                    np.array(sorted_points[i]) - np.array(sorted_points[j])
+                )
+                < threshold
+            ):
+                suppressed[j] = True
+
+    return result
+
+
 # 用于处理模板匹配的结果
 class MatchImage:
     result: cvtypes.MatLike
+    shape: cv2.typing.MatShape
 
-    def __init__(self, result: cvtypes.MatLike) -> None:
+    def __init__(self, shape: cv2.typing.MatShape, result: cvtypes.MatLike) -> None:
         self.result = result
+        self.shape = shape
 
     def Max(self, mask: cvtypes.MatLike | None = None):
         _, max_val, _, max_loc = cv2.minMaxLoc(self.result, mask)
@@ -33,13 +65,19 @@ class MatchImage:
         val, _ = self.Min(mask)
         return val < threshold
 
-    def MaxThan(self, threshold: float, mask: cvtypes.MatLike | None = None):
-        val, loc = self.Max(mask)
-        return loc, val > threshold
+    def BigThan(self, threshold: float, mask: cvtypes.MatLike | None = None):
+        loc = np.where(self.result >= threshold)  # type: ignore
+        pts = list(zip(*loc[::-1]))
+        scores = self.result[loc]
+        nms_threshold = min(self.shape) / 2
+        return NonMaxSuppression(pts, scores, nms_threshold)
 
-    def MinThan(self, threshold: float, mask: cvtypes.MatLike | None = None):
-        val, loc = self.Min(mask)
-        return loc, val < threshold
+    def SmallThan(self, threshold: float, mask: cvtypes.MatLike | None = None):
+        loc = np.where(self.result <= threshold)  # type: ignore
+        pts = list(zip(*loc[::-1]))
+        scores = self.result[loc]
+        nms_threshold = min(self.shape) / 2
+        return NonMaxSuppression(pts, scores, nms_threshold)
 
 
 class SplitSelect:
@@ -90,6 +128,9 @@ class Image:
             self.precessFunc = preprocessFunc
             preprocessFunc(self)
         self.__origin = self.src.copy()  # type: ignore
+
+    def ToPillowImage(self) -> PILImage.Image:
+        return PILImage.fromarray(self.src)
 
     def Reset(self):
         self.src = self.__origin.copy()
@@ -180,7 +221,7 @@ class Image:
         fy: float | EllipsisType = ...,
         interpolation: int = cv2.INTER_LINEAR,
     ):
-        cv2.resize(
+        self.src = cv2.resize(
             self.src,
             dsize,
             self.src,
@@ -253,7 +294,7 @@ class Image:
         else:
             tpl = cast(Image, image).src
         res = cv2.matchTemplate(tpl, self.src, method, None, mask)
-        return MatchImage(res)
+        return MatchImage(self.src.shape, res)
 
     def Rectangle(
         self,
@@ -336,7 +377,7 @@ class Image:
         return self
 
     def Crop(self, rect: cvtypes.Rect):
-        """裁剪图像
+        """裁剪自身
 
         Args:
             rect (Rect): [x, y, width, height]
@@ -344,6 +385,15 @@ class Image:
 
         self.src = self.src[rect[1] : rect[1] + rect[3], rect[0] : rect[0] + rect[2]]
         return self
+
+    def Cut(self, rect: cvtypes.Rect):
+        """裁剪图像, 返回被裁剪的图像
+
+        Args:
+            rect (Rect): [x, y, width, height]
+        """
+
+        return Image(self.src[rect[1] : rect[1] + rect[3], rect[0] : rect[0] + rect[2]])
 
     def Rotate(self, angle: int, scale: int = 1, center: cvtypes.Point2f | None = None):
         """逆时针旋转"""

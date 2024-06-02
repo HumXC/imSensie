@@ -1,4 +1,5 @@
-from ba import game, scenes
+import cv2
+from ba import game, images, scenes
 from ba.element import Screen
 from ba.scenes import Edge, Graph
 from test import scenes as tscenes, testing
@@ -23,6 +24,8 @@ def testScenes():
     tscenes.邮箱.test()
     tscenes.战术对抗赛.test()
     tscenes.业务区.test()
+    tscenes.咖啡厅_MoomTalk.test()
+    tscenes.咖啡厅_通知.test()
 
 
 testScenes()

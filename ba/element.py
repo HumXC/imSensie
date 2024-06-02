@@ -1,7 +1,9 @@
 import enum
-from typing import Protocol, cast
+from typing import Generic, Protocol, TypeVar, cast
 
 from ba.cv import Image
+
+T = TypeVar("T", covariant=True)
 
 
 class Preprocessor(Protocol):
@@ -12,12 +14,21 @@ class Likeable(Protocol):
     def Like(self, templ: Image) -> bool: ...
 
 
+class Ocrable(Protocol[T]):
+    def Ocr(self, image: Image) -> T: ...
+
+
+class Findable(Protocol[T]):
+    def Find(self, templ: Image) -> tuple[T]: ...
+
+
 class Element(Preprocessor, Likeable, Protocol): ...
 
 
 class ActionType(enum.Enum):
     CLICK = "click"
     ELEMENT_CLIEK = "element_click"
+    FINDABLE_CLICK = "findable_click"
 
 
 class Action:
@@ -35,6 +46,13 @@ class ClickAction(Action, tuple[int, int]):
         s = super().__new__(cls, (x, y))
         s.name = name
         return s
+
+
+class FindableClickAction(Action, Findable[ClickAction]):
+    type = ActionType.FINDABLE_CLICK
+
+    def __init__(self, name: str) -> None:
+        self.name = name
 
 
 class ElementClickAction(ClickAction, Element):

@@ -16,6 +16,7 @@
         devShells.default = with pkgs; mkShell {
           packages = [
             py
+            tesseract
           ];
           NIX_LD_LIBRARY_PATH = lib.makeLibraryPath [
             libGL

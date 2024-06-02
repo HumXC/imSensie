@@ -9,12 +9,34 @@ from ba.utils import *
 
 ADDR: str = "192.168.1.17:15600"
 
+srk = shiroko.Client(ADDR)
+srk.window.ResetSize()
+game = Game(srk)
+game.Launch()
 
-def main():
-    srk = shiroko.Client(ADDR)
-    srk.window.ResetSize()
-    game = Game(srk)
-    game.Launch()
+
+def 领取咖啡厅收益():
+    game.Goto(scenes.咖啡厅_收益)
+    game.DoAction(scenes.咖啡厅_收益.领取)
+
+
+def 咖啡厅邀请(name: str) -> bool:
+    ok, msg = game.Goto(scenes.咖啡厅_MoomTalk)
+    if not ok:
+        print(msg)
+        return False
+    action = scenes.咖啡厅_MoomTalk.邀请(game.Screen().src, name)
+    if action is None:
+        print(f"未找到 {name} 的邀请")
+        return False
+    ok, _ = game.DoAction(action)
+    if ok:
+        if game.CurrentScene() == scenes.咖啡厅_通知:
+            ok, _ = game.DoAction(scenes.咖啡厅_通知.确认)
+    return ok
+
+
+def main1():
     game.Goto(scenes.大厅)
     redPoints = game.FindRedPoint()
     for p in redPoints:
@@ -42,11 +64,16 @@ def main():
                     game.Goto(scenes.战术对抗赛)
                     game.IfLikeAndDo(scenes.战术对抗赛.时间奖励)
             continue
-    game.Goto(scenes.咖啡厅_收益)
-    game.IfLikeAndDo(scenes.咖啡厅_收益.领取)
 
     game.Goto(scenes.大厅_全屏)
 
+    srk.window.ResetSize()
+    print("Done")
+
+
+def main():
+    # 咖啡厅邀请("优香")
+    # 领取咖啡厅收益()
     srk.window.ResetSize()
     print("Done")
 
