@@ -96,22 +96,38 @@ class Game:
                 return e
         return scenes.Unknow
 
-    def DoAction(self, a: scenes.Action) -> tuple[bool, str]:
-        result = False
+    def DoAction(
+        self, a: scenes.Action, findName: str | None = None
+    ) -> tuple[bool, str]:
+        ok = False
         msg = ""
         if a.type == element.ActionType.CLICK:
-            result = True
             self.Click(cast(element.ClickAction, a))
+            ok = True
+        if a.type == element.ActionType.SLIDE:
+            s = cast(element.SlideAction, a)
+            self.input.Swipe(s.start, s.end, s.duration)
+            ok = True
         elif a.type == element.ActionType.ELEMENT_CLIEK:
             a = cast(element.ElementClickAction, a)
             isLike = self.LastScreen.IsLike(a)
-            result = isLike
+            ok = isLike
             if isLike:
                 self.Click(a)
             else:
                 msg = f"screen not like element [{a.name}]"
-        time.sleep(0.5)
-        return result, msg
+        elif a.type == element.ActionType.FINDABLE_CLICK:
+            a = cast(element.FindableClickAction, a)
+            acs = a.Find(self.LastScreen.src)
+
+            for ac in acs:
+                if ac.name == findName:
+                    return self.DoAction(ac)
+            msg = f"findable [{a.name}] not found [{findName}]"
+            ok = False
+        if ok:
+            time.sleep(0.5)
+        return ok, msg
 
     def Special(self, cs: element.Element) -> bool:
         if cs == scenes.Unknow:
@@ -127,9 +143,12 @@ class Game:
             print("获得奖励")
             self.Click(scenes.获得奖励.继续)
             return True
+        if cs == scenes.咖啡厅_MoomTalk_通知:
+            self.Click(scenes.咖啡厅_MoomTalk_通知.确认)
+            return True
         return False
 
-    def Goto(self, s: element.Element) -> tuple[bool, str]:
+    def Goto(self, s: element.Element, findName: str | None = None) -> tuple[bool, str]:
         while True:
             cs = self.CurrentScene()
             if cs == s:
@@ -142,7 +161,7 @@ class Game:
                 raise Exception("no path")
             action = self.grap.FindActions(path[:2])[0]
             for a in action:
-                ok, msg = self.DoAction(a)
+                ok, msg = self.DoAction(a, findName)
                 if not ok:
                     return False, msg
 

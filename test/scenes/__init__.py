@@ -1,4 +1,5 @@
 from . import (
+    咖啡厅_MoomTalk_通知,
     大厅_全屏,
     登录_进入游戏,
     大厅,
@@ -16,5 +17,4 @@ from . import (
     业务区,
     战术对抗赛,
     咖啡厅_MoomTalk,
-    咖啡厅_通知,
 )

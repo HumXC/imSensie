@@ -1,5 +1,6 @@
 import enum
-from typing import Generic, Protocol, TypeVar, cast
+from os import name
+from typing import Protocol, TypeVar, cast
 
 from ba.cv import Image
 
@@ -29,6 +30,7 @@ class ActionType(enum.Enum):
     CLICK = "click"
     ELEMENT_CLIEK = "element_click"
     FINDABLE_CLICK = "findable_click"
+    SLIDE = "slide"
 
 
 class Action:
@@ -59,6 +61,22 @@ class ElementClickAction(ClickAction, Element):
     type: ActionType = ActionType.ELEMENT_CLIEK
 
 
+class SlideAction(Action):
+    type = ActionType.SLIDE
+    start: tuple[int, int]
+    end: tuple[int, int]
+    duration: int
+
+    def __init__(
+        self, name: str, start: tuple[int, int], end: tuple[int, int], duration: int
+    ) -> None:
+        self.name = name
+        self.start = start
+        self.end = end
+        self.duration = duration
+
+
+# ElementActions = ElementClickAction | OtherElementAction
 ElementActions = ElementClickAction
 
 

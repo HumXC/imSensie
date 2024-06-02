@@ -14,6 +14,7 @@ from ba.element import (
     Element as Element,
     FindableClickAction,
     Ocrable,
+    SlideAction,
 )
 import pytesseract
 
@@ -303,14 +304,14 @@ class __咖啡厅_说明(可以点击空白处, BaseElement):
         ) and self.subTitle.MatchTemplate(subTitle).IsMax(0.95)
 
 
-class __咖啡厅_通知(可以点击空白处, BaseElement):
-    name = "咖啡厅_通知"
+class __咖啡厅_MoomTalk_通知(可以点击空白处, BaseElement):
+    name = "咖啡厅_MoomTalk_通知"
     title: Image
     subTitle: Image
     确认 = ClickAction("确认", 1136, 731)
 
     def __init__(self) -> None:
-        base = self.Preprocessing(images.get("咖啡厅_通知"))
+        base = self.Preprocessing(images.get("咖啡厅_MoomTalk_通知"))
         self.title = base.Copy().Crop((215, 1, 276, 58))
         self.subTitle = base.Crop((883, 229, 146, 67))
 
@@ -365,7 +366,24 @@ class __咖啡厅_MoomTalk(可以点击空白处, BaseElement):
         _dict = {
             "干世": "千世",
             "景套": "晴奈",
+            "景奈": "晴奈",
+            "十世": "千世",
+            "日子": "白子",
+            "泉亭": "泉奈",
+            "绩音": "绫音",
+            "睡月": "睦月",
+            "晾": "晴",
+            "干寻": "千寻",
+            "美咪": "美咲",
         }
+
+        _replace = [
+            [" ", ""],
+            ["}", ")"],
+            ["鹄", "鹤"],
+            ["纱绩", "纱绫"],
+            ["干夏", "千夏"],
+        ]
 
         def __init__(self) -> None:
             self.src = (
@@ -399,13 +417,16 @@ class __咖啡厅_MoomTalk(可以点击空白处, BaseElement):
                 name: str = pytesseract.image_to_string(
                     img.src, lang="chi_sim", config="--psm 7"
                 )
-                name = name.strip().replace(" ", "")
+                name = name.strip()
+                for old, new in self._replace:
+                    name = name.replace(old, new)
                 name = self._dict.get(name, name)
                 result.append(ClickAction(name, pt[0], pt[1]))
             return result
 
     name = "咖啡厅_MoomTalk"
     邀请按钮 = __邀请按钮()
+    上滑 = SlideAction("上滑", (924, 330 + 464), (924, 330), 1000)
 
     def __init__(self) -> None:
         self.src = self.Preprocessing(images.get("咖啡厅_MoomTalk"))
@@ -415,15 +436,6 @@ class __咖啡厅_MoomTalk(可以点击空白处, BaseElement):
 
     def Like(self, image: Image) -> bool:
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
-
-    def 邀请列表(self, image: Image) -> list[ClickAction]:
-        return self.邀请按钮.Find(image)
-
-    def 邀请(self, image: Image, name: str) -> ClickAction | None:
-        l = self.邀请列表(image)
-        for i in l:
-            if i.name == name:
-                return i
 
 
 class __邮箱(TitleScenes):
@@ -513,7 +525,7 @@ Unknow = __Unknow()
 业务区 = __业务区()
 战术对抗赛 = __战术对抗赛()
 咖啡厅_MoomTalk = __咖啡厅_MoomTalk()
-咖啡厅_通知 = __咖啡厅_通知()
+咖啡厅_MoomTalk_通知 = __咖啡厅_MoomTalk_通知()
 All: list[BaseElement] = [
     获得奖励,
     登录_通知,
@@ -528,7 +540,7 @@ All: list[BaseElement] = [
     咖啡厅_收益,
     咖啡厅_说明,
     咖啡厅_MoomTalk,
-    咖啡厅_通知,
+    咖啡厅_MoomTalk_通知,
     登录_更新提醒,
     邮箱,
     业务区,
@@ -571,8 +583,8 @@ class Graph:
         咖啡厅: [大厅, 咖啡厅_收益, 咖啡厅_MoomTalk],
         咖啡厅_收益: [咖啡厅, 获得奖励],
         咖啡厅_说明: [咖啡厅],
-        咖啡厅_MoomTalk: [咖啡厅, 咖啡厅_通知],
-        咖啡厅_通知: [咖啡厅_MoomTalk],
+        咖啡厅_MoomTalk: [咖啡厅, 咖啡厅_MoomTalk_通知],
+        咖啡厅_MoomTalk_通知: [咖啡厅_MoomTalk],
         邮箱: [大厅, 获得奖励],
         业务区: [大厅, 战术对抗赛],
         战术对抗赛: [业务区, 获得奖励, 大厅],
@@ -594,8 +606,8 @@ class Graph:
         Edge(咖啡厅, 咖啡厅_收益): [咖啡厅.收益],
         Edge(咖啡厅, 咖啡厅_MoomTalk): [咖啡厅.邀请劵],
         Edge(咖啡厅_MoomTalk, 咖啡厅): [咖啡厅_MoomTalk.空白处],
-        Edge(咖啡厅_MoomTalk, 咖啡厅_通知): [咖啡厅_MoomTalk.邀请按钮],
-        Edge(咖啡厅_通知, 咖啡厅_MoomTalk): [咖啡厅_通知.空白处],
+        Edge(咖啡厅_MoomTalk, 咖啡厅_MoomTalk_通知): [咖啡厅_MoomTalk.邀请按钮],
+        Edge(咖啡厅_MoomTalk_通知, 咖啡厅_MoomTalk): [咖啡厅_MoomTalk_通知.空白处],
         Edge(咖啡厅_收益, 咖啡厅): [咖啡厅_收益.空白处],
         Edge(咖啡厅_收益, 获得奖励): [咖啡厅_收益.领取],
         Edge(咖啡厅_说明, 咖啡厅): [咖啡厅_说明.空白处],

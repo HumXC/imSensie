@@ -1,3 +1,4 @@
+from typing import Any
 import cv2
 from ba import game, images, scenes
 from ba.element import Screen
@@ -25,8 +26,8 @@ def testScenes():
     tscenes.战术对抗赛.test()
     tscenes.业务区.test()
     tscenes.咖啡厅_MoomTalk.test()
-    tscenes.咖啡厅_通知.test()
+    tscenes.咖啡厅_MoomTalk_通知.test()
 
 
-testScenes()
-Graph().Draw("MiSans", "graph.png")
+# testScenes()
+# Graph().Draw("MiSans", "graph.png")
