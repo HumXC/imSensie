@@ -1,5 +1,5 @@
 from datetime import timedelta
-from os import environ, path
+from os import environ, path, remove
 import random
 from typing import cast
 from collections import deque
@@ -765,28 +765,96 @@ class Graph:
                 )
         plt.savefig(file, dpi=600)
 
-    def Show(self):
+    def Show(self, output: str = "scens"):
         from pyvis.network import Network
-        import networkx as nx
 
-        G = nx.DiGraph()
-        G.add_edge("A", "B", label="A->B")
-        G.add_edge("B", "A", label="B->A")
-        G.add_edge("A", "C", label="A->C")
-        G.add_edge("C", "D", label="C->D")
-        G.add_edge("D", "A", label="D->A")
-        # for vertex in self.graph:
-        #     G.add_node(vertex)
-        # for from_vertex in self.graph:
-        #     for to_vertex in self.graph[from_vertex]:
-        #         G.add_edge(0, 1)
-        net = Network(notebook=True)
-        net.from_nx(G)
+        colors = [
+            "#1f77b4",
+            "#2ca02c",
+            "#d62728",
+            "#9467bd",
+            "#8c564b",
+            "#e377c2",
+            "#7f7f7f",
+            "#bcbd22",
+            "#17becf",
+            "#ff7f0e",
+            "#393b79",
+            "#637939",
+            "#8c6d31",
+            "#843c39",
+            "#7b4173",
+            "#5254a3",
+            "#6b6ecf",
+            "#9c9ede",
+            "#8ca252",
+            "#b5cf6b",
+            "#cedb9c",
+            "#bd9e39",
+            "#e7ba52",
+            "#e7969c",
+            "#de9ed6",
+            "#ad494a",
+            "#d6616b",
+            "#e7cb94",
+            "#7b4173",
+            "#a55194",
+            "#ce6dbd",
+        ]
+        net = Network(
+            notebook=True,
+            cdn_resources="in_line",
+            height="1000px",
+            neighborhood_highlight=True,
+            directed=True,
+            bgcolor="#000000",
+        )
+        for a in self.actions:
+            label = ""
+            for action in self.actions[a]:
+                label += "\n" + action.type.value + ":" + str(action)
+                label = label[1:]
+                net.add_node(str(a.frome), physics=False)
+                net.add_node(str(a.to), physics=False)
+                net.add_edge(
+                    str(a.frome),
+                    str(a.to),
+                    label=label,
+                    arrowStrikethrough=False,
+                )
         for node in net.nodes:
             node["title"] = node["id"]
+            node["title"] = node["id"]
+            node["font"] = {"size": 16, "color": "white", "background": "none"}
         for edge in net.edges:
+            color = random.choice(colors)
+            for edge2 in net.edges:
+                if edge["from"] == edge2["to"] and edge["to"] == edge2["from"]:
+                    edge["smooth"] = {
+                        "type": "curvedCW",
+                        "roundness": 0.5,
+                    }
             edge["title"] = edge["label"]
-        net.show("scene.html")
+            edge["label"] = edge["label"]
+            edge["color"] = color
+            edge["font"] = {
+                "size": 10,
+                "align": "middle",
+                "background": "none",
+                "color": color,
+                "strokeWidth": 1,
+                "strokeColor": "#b2b2b2",
+            }
+            edge["smooth"] = {
+                "type": "curvedCW",
+                "roundness": 0.3,
+            }
+
+        try:
+            remove(output + ".html")
+        except:
+            pass
+        net.show(output + ".html")
 
     def FindPath(self, start: Element, end: Element) -> list[Element] | None:
         queue = deque([[start]])

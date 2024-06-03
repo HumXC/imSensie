@@ -21,19 +21,13 @@ def 领取咖啡厅收益():
 
 
 def 咖啡厅邀请(name: str) -> bool:
-    ok, msg = game.Goto(scenes.咖啡厅_MoomTalk)
-    if not ok:
+    while True:
+        ok, msg = game.Goto(scenes.咖啡厅_MoomTalk_通知, findName=name)
+        if ok:
+            game.DoAction(scenes.咖啡厅_MoomTalk_通知.确认)
+            return True
         print(msg)
-        return False
-    action = scenes.咖啡厅_MoomTalk.邀请(game.Screen().src, name)
-    if action is None:
-        print(f"未找到 {name} 的邀请")
-        return False
-    ok, _ = game.DoAction(action)
-    if ok:
-        if game.CurrentScene() == scenes.咖啡厅_通知:
-            ok, _ = game.DoAction(scenes.咖啡厅_通知.确认)
-    return ok
+        game.DoAction(scenes.咖啡厅_MoomTalk.上滑)
 
 
 def main1():
@@ -72,8 +66,7 @@ def main1():
 
 
 def main():
-    # 咖啡厅邀请("优香")
-    # 领取咖啡厅收益()
+    咖啡厅邀请("白子")
     srk.window.ResetSize()
     print("Done")
 

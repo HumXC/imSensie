@@ -15,14 +15,14 @@ class Likeable(Protocol):
     def Like(self, templ: Image) -> bool: ...
 
 
-class Ocrable[T](Protocol):
+class Ocrable(Protocol[T]):
     area: tuple[int, int, int, int]  # 用于描述识别的区域，debug用
     name: str
 
     def Ocr(self, image: Image) -> T: ...
 
 
-class Findable[T](Protocol):
+class Findable(Protocol[T]):
     def Find(self, templ: Image) -> tuple[T]: ...
 
 
