@@ -1,3 +1,5 @@
+import functools
+import time
 from typing import Callable, cast
 
 import numpy as np
@@ -6,6 +8,19 @@ from cv2.typing import Rect
 from ba.cv import Image
 
 Point = tuple[int, int]
+
+
+def Timeit(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time.time()  # 记录开始时间
+        result = func(*args, **kwargs)  # 执行函数
+        end_time = time.time()  # 记录结束时间
+        elapsed_time = end_time - start_time  # 计算运行时间
+        print(f"Function '{func.__name__}' executed in {elapsed_time:.4f} seconds")
+        return result
+
+    return wrapper
 
 
 def Distance(p1: Point, p2: Point):

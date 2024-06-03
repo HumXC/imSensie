@@ -15,15 +15,23 @@ class Likeable(Protocol):
     def Like(self, templ: Image) -> bool: ...
 
 
-class Ocrable(Protocol[T]):
+class Ocrable[T](Protocol):
+    area: tuple[int, int, int, int]  # 用于描述识别的区域，debug用
+    name: str
+
     def Ocr(self, image: Image) -> T: ...
 
 
-class Findable(Protocol[T]):
+class Findable[T](Protocol):
     def Find(self, templ: Image) -> tuple[T]: ...
 
 
-class Element(Preprocessor, Likeable, Protocol): ...
+class Element(Preprocessor, Likeable, Protocol):
+    area: list[tuple[int, int, int, int]]  # 用于描述识别的区域，debug用
+    name: str
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class ActionType(enum.Enum):
@@ -36,6 +44,11 @@ class ActionType(enum.Enum):
 class Action:
     type: ActionType
     name: str = "Unknown"
+    sleep: int = 0  # seconds
+
+    def __init__(self, sleep: int | None = None) -> None:
+        if sleep is not None:
+            self.sleep = sleep  # seconds
 
     def __str__(self) -> str:
         return self.name
@@ -44,17 +57,21 @@ class Action:
 class ClickAction(Action, tuple[int, int]):
     type = ActionType.CLICK
 
-    def __new__(cls, name: str, x: int, y: int):
+    def __new__(cls, name: str, x: int, y: int, sleep: int | None = None):
         s = super().__new__(cls, (x, y))
         s.name = name
         return s
+
+    def __init__(self, name: str, x: int, y: int, sleep: int | None = None):
+        super().__init__(sleep)
 
 
 class FindableClickAction(Action, Findable[ClickAction]):
     type = ActionType.FINDABLE_CLICK
 
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, sleep: int | None = None) -> None:
         self.name = name
+        super().__init__(sleep)
 
 
 class ElementClickAction(ClickAction, Element):

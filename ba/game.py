@@ -60,16 +60,19 @@ class Game:
             raise ImageSizeMismatchError(IMAGE_SIZE, img.Size())
         return img
 
+    @utils.Timeit
     def Screen(self) -> element.Screen:
         self.LastScreen = element.Screen(self.Png())
         return self.LastScreen
 
+    @utils.Timeit
     def IfLikeAndDo(self, a: element.ElementActions) -> bool:
         isLike = self.Screen().IsLike(a)
         if isLike:
             self.DoAction(a)
         return isLike
 
+    @utils.Timeit
     def Launch(self):
         self.srk.window.SetSize(SCREEN_SIZE[0], SCREEN_SIZE[1])
         # 唤醒屏幕
@@ -96,6 +99,7 @@ class Game:
                 return e
         return scenes.Unknow
 
+    @utils.Timeit
     def DoAction(
         self, a: scenes.Action, findName: str | None = None
     ) -> tuple[bool, str]:
@@ -126,9 +130,10 @@ class Game:
             msg = f"findable [{a.name}] not found [{findName}]"
             ok = False
         if ok:
-            time.sleep(0.5)
+            time.sleep(a.sleep)
         return ok, msg
 
+    @utils.Timeit
     def Special(self, cs: element.Element) -> bool:
         if cs == scenes.Unknow:
             self.Click(scenes.Unknow.空白处)
@@ -148,11 +153,11 @@ class Game:
             return True
         return False
 
+    @utils.Timeit
     def Goto(self, s: element.Element, findName: str | None = None) -> tuple[bool, str]:
         while True:
             cs = self.CurrentScene()
             if cs == s:
-                time.sleep(0.5)
                 return True, ""
             if self.Special(cs):
                 continue
@@ -173,6 +178,7 @@ class Game:
             count -= 1
         return False
 
+    @utils.Timeit
     def Ocr(self, ocrable: Ocrable) -> str:
         return ocrable.Ocr(self.Screen().src)
 

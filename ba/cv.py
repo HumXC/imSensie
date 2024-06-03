@@ -130,7 +130,7 @@ class Image:
         self.__origin = self.src.copy()  # type: ignore
 
     def ToPillowImage(self) -> PILImage.Image:
-        return PILImage.fromarray(self.src)
+        return PILImage.fromarray(self.CvtColor(cv2.COLOR_BGR2RGB).NewImage().src)
 
     def Reset(self):
         self.src = self.__origin.copy()
@@ -152,6 +152,7 @@ class Image:
     def Show(
         self, windowName: str = "Image"
     ) -> tuple[Callable[[], None], Callable[[], None]]:
+        cv2.namedWindow(windowName, cv2.WINDOW_NORMAL)
         cv2.imshow(windowName, self.src)
 
         def destory():

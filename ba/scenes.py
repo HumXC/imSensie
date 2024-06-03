@@ -1,7 +1,6 @@
 from datetime import timedelta
+from os import environ, path
 import random
-import string
-import time
 from typing import cast
 from collections import deque
 import cv2
@@ -9,8 +8,8 @@ from ba import images
 from ba.cv import Image
 from ba.element import (
     Action,
-    ClickAction,
-    ElementClickAction,
+    ClickAction as baClickAction,
+    ElementClickAction as baElementClickAction,
     Element as Element,
     FindableClickAction,
     Ocrable,
@@ -18,18 +17,19 @@ from ba.element import (
 )
 import pytesseract
 
+environ["TESSDATA_PREFIX"] = path.join(path.dirname(__file__), "../blob/tessdata")
+from matplotlib.font_manager import FontProperties
 
-class BaseElement(Element):
-    name: str
+font_path = path.join(path.dirname(__file__), "../blob/MiSans-Normal.ttf")
+font_prop = FontProperties(fname=font_path)
 
-    def __str__(self) -> str:
-        return self.name
 
-    def Preprocessing(self, image: Image) -> Image:
-        raise NotImplementedError()
+class ClickAction(baClickAction):
+    sleep = 300
 
-    def Like(self, image: Image) -> bool:
-        raise NotImplementedError()
+
+class ElementClickAction(baElementClickAction):
+    sleep = 300
 
 
 class 可以点击空白处:
@@ -41,11 +41,12 @@ class 具有返回和主页按钮:
     大厅 = ClickAction("大厅", 1785, 31)
 
 
-class TitleScenes(具有返回和主页按钮, BaseElement):
+class TitleScenes(具有返回和主页按钮, Element):
     def __init__(self, name: str, titleArea: tuple[int, int, int, int]) -> None:
         self.name = name
         self.__titleArea = titleArea
         self.src = self.Preprocessing(images.get(name))
+        self.area = [titleArea]
 
     def Preprocessing(self, image: Image) -> Image:
         return image.Crop(self.__titleArea).CvtColor(cv2.COLOR_BGR2HLS).Apply()
@@ -54,7 +55,10 @@ class TitleScenes(具有返回和主页按钮, BaseElement):
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
-class __Unknow(可以点击空白处, BaseElement):
+class __Unknow(可以点击空白处, Element):
+    area = []
+    name = "Unknow"
+
     def __init__(self) -> None:
         return
 
@@ -65,10 +69,11 @@ class __Unknow(可以点击空白处, BaseElement):
         return True
 
 
-class __登录_通知(可以点击空白处, BaseElement):
+class __登录_通知(可以点击空白处, Element):
     name = "登录_通知"
     icon16plus: Image
     title: Image
+    area = [(1586, 892, 104, 133), (897, 225, 124, 73)]
 
     def __init__(self) -> None:
         base = self.Preprocessing(images.get("登录_通知"))
@@ -87,8 +92,9 @@ class __登录_通知(可以点击空白处, BaseElement):
         ) and self.title.MatchTemplate(title).IsMax(0.95)
 
 
-class __登录_进入游戏(可以点击空白处, BaseElement):
+class __登录_进入游戏(可以点击空白处, Element):
     name = "登录_进入游戏"
+    area = [(96, 994, 125, 68)]
 
     def __init__(self) -> None:
         self.src = self.Preprocessing(images.get("登录_进入游戏"))
@@ -100,9 +106,10 @@ class __登录_进入游戏(可以点击空白处, BaseElement):
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
-class __登录_更新提醒(BaseElement):
+class __登录_更新提醒(Element):
     name = "登录_更新提醒"
     确认 = ClickAction("确认", 1138, 728)
+    area = [(851, 231, 210, 62)]
 
     def __init__(self) -> None:
         self.src = self.Preprocessing(images.get("登录_更新提醒"))
@@ -114,7 +121,7 @@ class __登录_更新提醒(BaseElement):
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
-class __大厅(BaseElement):
+class __大厅(Element):
     name = "大厅"
     工作任务 = ClickAction("工作任务", 156, 315)
     邮箱 = ClickAction("邮箱", 1655, 56)
@@ -125,6 +132,7 @@ class __大厅(BaseElement):
     小组 = ClickAction("小组", 856, 1000)
     商店 = ClickAction("商店", 1174, 1000)
     业务区 = ClickAction("业务区", 1736, 875)
+    area = [(1512, 27, 288, 53)]
 
     def __init__(self) -> None:
         self.src = self.Preprocessing(images.get("大厅"))
@@ -137,7 +145,9 @@ class __大厅(BaseElement):
 
 
 class __工作任务(TitleScenes):
-    class __一键领取(ElementClickAction, BaseElement):
+    class __一键领取(ElementClickAction, Element):
+        area = [(1546, 977, 237, 68)]
+
         def __new__(cls):
             return ElementClickAction.__new__(cls, "一键领取", 1670, 1008)
 
@@ -150,7 +160,9 @@ class __工作任务(TitleScenes):
         def Like(self, image: Image) -> bool:
             return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
-    class __领取(ElementClickAction, BaseElement):
+    class __领取(ElementClickAction, Element):
+        area = [(1375, 974, 96, 63)]
+
         def __new__(cls):
             return ElementClickAction.__new__(cls, "领取", 1419, 1003)
 
@@ -175,8 +187,9 @@ class __小组大厅(TitleScenes):
         super().__init__("小组大厅", (210, 3, 171, 61))
 
 
-class __小组大厅_签到奖励(可以点击空白处, BaseElement):
+class __小组大厅_签到奖励(可以点击空白处, Element):
     name = "小组大厅_签到奖励"
+    area = [(815, 229, 284, 64)]
 
     def __init__(self) -> None:
         self.src = self.Preprocessing(images.get("小组大厅_签到奖励"))
@@ -188,9 +201,10 @@ class __小组大厅_签到奖励(可以点击空白处, BaseElement):
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
-class __获得奖励(BaseElement):
+class __获得奖励(Element):
     name = "获得奖励"
     继续 = ClickAction("继续", 968, 957)
+    area = [(738, 190, 454, 116)]
 
     def __init__(self) -> None:
         self.src = self.Preprocessing(images.get("获得奖励"))
@@ -208,8 +222,9 @@ class __获得奖励(BaseElement):
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.8)
 
 
-class __好感等级提升(可以点击空白处, BaseElement):
+class __好感等级提升(可以点击空白处, Element):
     name = "好感等级提升"
+    area = [(716, 899, 447, 81)]
 
     def __init__(self) -> None:
         self.src = self.Preprocessing(images.get("好感等级提升"))
@@ -221,9 +236,10 @@ class __好感等级提升(可以点击空白处, BaseElement):
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.8)
 
 
-class __大厅_全屏(BaseElement):
+class __大厅_全屏(Element):
     name = "大厅_全屏"
     退出全屏 = ClickAction("退出全屏", 1770, 50)
+    area = [(1731, 27, 83, 54)]
 
     def __init__(self) -> None:
         self.src = self.Preprocessing(images.get("大厅_全屏"))
@@ -236,7 +252,9 @@ class __大厅_全屏(BaseElement):
 
 
 class __咖啡厅(TitleScenes):
-    class __邀请劵(ElementClickAction, BaseElement):
+    class __邀请劵(ElementClickAction, Element):
+        area = [(1179, 940, 91, 101)]
+
         def __new__(cls):
             return ElementClickAction.__new__(cls, "邀请劵", 1227, 981)
 
@@ -249,7 +267,9 @@ class __咖啡厅(TitleScenes):
         def Like(self, image: Image) -> bool:
             return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
-    class __收益(ElementClickAction, BaseElement):
+    class __收益(ElementClickAction, Element):
+        area = [(1585, 926, 189, 46)]
+
         def __new__(cls):
             return ElementClickAction.__new__(cls, "收益", 1665, 965)
 
@@ -263,6 +283,9 @@ class __咖啡厅(TitleScenes):
             return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
     class __邀请剩余时间(Ocrable[timedelta]):
+        area = (1182, 885, 112, 42)
+        name = "邀请剩余时间"
+
         def Ocr(self, image: Image) -> timedelta:
             s = pytesseract.image_to_string(
                 image.Cut((1182, 885, 112, 42)).src,
@@ -282,10 +305,11 @@ class __咖啡厅(TitleScenes):
         super().__init__("咖啡厅", (215, 1, 276, 58))
 
 
-class __咖啡厅_说明(可以点击空白处, BaseElement):
+class __咖啡厅_说明(可以点击空白处, Element):
     name = "咖啡厅_说明"
     title: Image
     subTitle: Image
+    area = [(215, 1, 276, 58), (897, 263, 130, 62)]
 
     def __init__(self) -> None:
         base = self.Preprocessing(images.get("咖啡厅_说明"))
@@ -304,11 +328,12 @@ class __咖啡厅_说明(可以点击空白处, BaseElement):
         ) and self.subTitle.MatchTemplate(subTitle).IsMax(0.95)
 
 
-class __咖啡厅_MoomTalk_通知(可以点击空白处, BaseElement):
+class __咖啡厅_MoomTalk_通知(可以点击空白处, Element):
     name = "咖啡厅_MoomTalk_通知"
     title: Image
     subTitle: Image
     确认 = ClickAction("确认", 1136, 731)
+    area = [(215, 1, 276, 58), (883, 229, 146, 67)]
 
     def __init__(self) -> None:
         base = self.Preprocessing(images.get("咖啡厅_MoomTalk_通知"))
@@ -327,10 +352,13 @@ class __咖啡厅_MoomTalk_通知(可以点击空白处, BaseElement):
         ) and self.subTitle.MatchTemplate(subTitle).IsMax(0.95)
 
 
-class __咖啡厅_收益(可以点击空白处, BaseElement):
+class __咖啡厅_收益(可以点击空白处, Element):
     name = "咖啡厅_收益"
+    area = [(803, 220, 317, 65)]
 
-    class __领取(ElementClickAction, BaseElement):
+    class __领取(ElementClickAction, Element):
+        area = [(833, 714, 251, 94)]
+
         def __new__(cls):
             return ElementClickAction.__new__(cls, "领取", 963, 758)
 
@@ -355,7 +383,7 @@ class __咖啡厅_收益(可以点击空白处, BaseElement):
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
-class __咖啡厅_MoomTalk(可以点击空白处, BaseElement):
+class __咖啡厅_MoomTalk(可以点击空白处, Element):
     class __邀请按钮(FindableClickAction):
         name = "邀请"
         src: Image
@@ -413,7 +441,8 @@ class __咖啡厅_MoomTalk(可以点击空白处, BaseElement):
                     self._ocrAreaSize[0],
                     self._ocrAreaSize[1],
                 )
-                img = image.Cut(ocrArea).CvtGray().Threshold(130)
+                img = image.Cut(ocrArea).CvtGray()
+
                 name: str = pytesseract.image_to_string(
                     img.src, lang="chi_sim", config="--psm 7"
                 )
@@ -431,6 +460,8 @@ class __咖啡厅_MoomTalk(可以点击空白处, BaseElement):
     def __init__(self) -> None:
         self.src = self.Preprocessing(images.get("咖啡厅_MoomTalk"))
 
+    area = [(646, 138, 263, 69)]
+
     def Preprocessing(self, image: Image) -> Image:
         return image.Crop((646, 138, 263, 69)).CvtGray().Threshold(200)
 
@@ -439,7 +470,9 @@ class __咖啡厅_MoomTalk(可以点击空白处, BaseElement):
 
 
 class __邮箱(TitleScenes):
-    class __一键领取(ElementClickAction, BaseElement):
+    class __一键领取(ElementClickAction, Element):
+        area = [(1534, 969, 221, 81)]
+
         def __new__(cls):
             return ElementClickAction.__new__(cls, "一键领取", 1648, 1006)
 
@@ -473,7 +506,9 @@ class __业务区(TitleScenes):
 
 
 class __战术对抗赛(TitleScenes):
-    class __时间奖励(ElementClickAction, BaseElement):
+    class __时间奖励(ElementClickAction, Element):
+        area = [(478, 525, 171, 97)]
+
         def __new__(cls):
             return ElementClickAction.__new__(cls, "时间奖励", 558, 585)
 
@@ -486,7 +521,9 @@ class __战术对抗赛(TitleScenes):
         def Like(self, image: Image) -> bool:
             return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
-    class __每日奖励(ElementClickAction, BaseElement):
+    class __每日奖励(ElementClickAction, Element):
+        area = [(482, 644, 162, 83)]
+
         def __new__(cls):
             return ElementClickAction.__new__(cls, "每日奖励", 558, 686)
 
@@ -526,7 +563,7 @@ Unknow = __Unknow()
 战术对抗赛 = __战术对抗赛()
 咖啡厅_MoomTalk = __咖啡厅_MoomTalk()
 咖啡厅_MoomTalk_通知 = __咖啡厅_MoomTalk_通知()
-All: list[BaseElement] = [
+All: list[Element] = [
     获得奖励,
     登录_通知,
     登录_进入游戏,
@@ -620,7 +657,8 @@ class Graph:
         Edge(战术对抗赛, 大厅): [战术对抗赛.大厅],
     }
 
-    def Draw(self, chineseFont: str, file: str):
+    def Draw(self, file: str):
+        chineseFont = "MiSans"
         import matplotlib.pyplot as plt
         import networkx as nx
 
