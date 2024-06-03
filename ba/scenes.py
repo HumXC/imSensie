@@ -18,10 +18,6 @@ from ba.element import (
 import pytesseract
 
 environ["TESSDATA_PREFIX"] = path.join(path.dirname(__file__), "../blob/tessdata")
-from matplotlib.font_manager import FontProperties
-
-font_path = path.join(path.dirname(__file__), "../blob/MiSans-Normal.ttf")
-font_prop = FontProperties(fname=font_path)
 
 
 class ClickAction(baClickAction):
@@ -658,9 +654,13 @@ class Graph:
     }
 
     def Draw(self, file: str):
-        chineseFont = "MiSans"
         import matplotlib.pyplot as plt
         import networkx as nx
+        import matplotlib.font_manager as fm
+        from os import path
+
+        font_path = path.join(path.dirname(__file__), "../blob/MiSans-Normal.ttf")
+        font_prop = fm.FontProperties(fname=font_path)
 
         G = nx.DiGraph()
         for vertex in self.graph:
@@ -675,7 +675,16 @@ class Graph:
         ax = cf.add_axes((0, 0, 1, 1))
         ax.set_axis_off()
         nx.draw_networkx_nodes(G, pos, ax=ax, node_size=3000, alpha=0.5)
-        nx.draw_networkx_labels(G, pos, font_family=chineseFont, font_color="white")
+        for n in G.nodes:
+            ax.annotate(
+                n,
+                xy=pos[n],
+                ha="center",
+                va="center",
+                fontproperties=font_prop,
+                fontsize=12,
+                color="white",
+            )
 
         edgeLabels = {}
         for a in self.actions:
@@ -734,7 +743,7 @@ class Graph:
                     edge_color=color,
                     arrowsize=20,
                     min_target_margin=15,
-                    node_size=3000,
+                    node_size=4000,
                     edge_vmin=100,
                 )[0]
                 # 计算曲线边的中点
@@ -752,10 +761,32 @@ class Graph:
                     va="center",
                     fontsize=8,
                     transform=path_transform,
-                    font=chineseFont,
+                    fontproperties=font_prop,
                 )
-
         plt.savefig(file, dpi=600)
+
+    def Show(self):
+        from pyvis.network import Network
+        import networkx as nx
+
+        G = nx.DiGraph()
+        G.add_edge("A", "B", label="A->B")
+        G.add_edge("B", "A", label="B->A")
+        G.add_edge("A", "C", label="A->C")
+        G.add_edge("C", "D", label="C->D")
+        G.add_edge("D", "A", label="D->A")
+        # for vertex in self.graph:
+        #     G.add_node(vertex)
+        # for from_vertex in self.graph:
+        #     for to_vertex in self.graph[from_vertex]:
+        #         G.add_edge(0, 1)
+        net = Network(notebook=True)
+        net.from_nx(G)
+        for node in net.nodes:
+            node["title"] = node["id"]
+        for edge in net.edges:
+            edge["title"] = edge["label"]
+        net.show("scene.html")
 
     def FindPath(self, start: Element, end: Element) -> list[Element] | None:
         queue = deque([[start]])
