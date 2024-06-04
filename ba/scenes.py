@@ -21,11 +21,11 @@ environ["TESSDATA_PREFIX"] = path.join(path.dirname(__file__), "../blob/tessdata
 
 
 class ClickAction(baClickAction):
-    sleep = 300
+    sleep = 0.3
 
 
 class ElementClickAction(baElementClickAction):
-    sleep = 300
+    sleep = 0.3
 
 
 class 可以点击空白处:
@@ -604,12 +604,14 @@ class Graph:
         登录_进入游戏: [大厅],
         大厅: [
             小组大厅,
+            小组大厅_签到奖励,
             工作任务,
             大厅_全屏,
             咖啡厅,
             邮箱,
             业务区,
         ],
+        小组大厅_签到奖励: [小组大厅],
         小组大厅: [大厅],
         工作任务: [大厅, 获得奖励],
         大厅_全屏: [大厅],
@@ -631,8 +633,10 @@ class Graph:
         Edge(大厅, 咖啡厅_说明): [大厅.咖啡厅],
         Edge(大厅, 邮箱): [大厅.邮箱],
         Edge(大厅, 业务区): [大厅.业务区],
+        Edge(大厅, 小组大厅_签到奖励): [大厅.小组],
         Edge(大厅_全屏, 大厅): [大厅_全屏.退出全屏],
         Edge(小组大厅, 大厅): [小组大厅.返回],
+        Edge(小组大厅_签到奖励, 小组大厅): [小组大厅_签到奖励.空白处],
         Edge(工作任务, 大厅): [工作任务.返回],
         Edge(工作任务, 获得奖励): [工作任务.一键领取, 工作任务.领取],
         Edge(咖啡厅, 大厅): [咖啡厅.返回],

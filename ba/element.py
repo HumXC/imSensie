@@ -44,7 +44,7 @@ class ActionType(enum.Enum):
 class Action:
     type: ActionType
     name: str = "Unknown"
-    sleep: int = 0  # seconds
+    sleep: float = 0  # seconds
 
     def __init__(self, sleep: int | None = None) -> None:
         if sleep is not None:

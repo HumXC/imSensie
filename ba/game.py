@@ -7,7 +7,7 @@ from shiroko.input import Input
 
 from ba import scenes, utils
 from ba import element
-from ba.element import ClickAction, Likeable, Ocrable
+from ba.element import T, ClickAction, Findable, Likeable, Ocrable
 from ba.cv import Image
 
 
@@ -29,7 +29,8 @@ IMAGE_SIZE = (1920, 1080)
 
 RedPoints = [
     [scenes.大厅.工作任务, (191, 327, 48, 56)],
-    [scenes.大厅.小组, (371, 983, 59, 60)],
+    [scenes.大厅.日程, (371, 983, 59, 60)],
+    [scenes.大厅.小组, (862, 995, 45, 48)],
     [scenes.大厅.业务区, (1778, 767, 71, 76)],
     [scenes.大厅.邮箱, (1686, 3, 48, 57)],
     [scenes.业务区.战术对抗赛, (1712, 559, 43, 46)],
@@ -163,7 +164,7 @@ class Game:
                 continue
             path = self.grap.FindPath(cs, s)
             if path is None:
-                raise Exception("no path")
+                raise Exception(f"path not found [{cs.name}] -> [{s.name}]")
             action = self.grap.FindActions(path[:2])[0]
             for a in action:
                 ok, msg = self.DoAction(a, findName)
@@ -177,6 +178,10 @@ class Game:
             time.sleep(1)
             count -= 1
         return False
+
+    @utils.Timeit
+    def Find(self, scene: Findable[T]) -> tuple[T]:
+        return scene.Find(self.Screen().src)
 
     @utils.Timeit
     def Ocr(self, ocrable: Ocrable) -> str:
