@@ -2,3 +2,6 @@ __pycache__
 .venv
 .envrc
 .direnv
+.env
+scenes.png
+scenes.html

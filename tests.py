@@ -18,5 +18,5 @@ for scene in scenes.All:
     t.Show()
 
 
-# Graph().Draw("graph.png")
-Graph().Show("scens")
+Graph().Draw("scenes")
+Graph().Show("scenes")

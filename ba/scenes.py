@@ -534,9 +534,26 @@ class __战术对抗赛(TitleScenes):
 
     时间奖励 = __时间奖励()
     每日奖励 = __每日奖励()
+    对手1 = ClickAction("对手1", 988, 398)
+    对手2 = ClickAction("对手2", 988, 619)
+    对手3 = ClickAction("对手3", 988, 836)
 
     def __init__(self) -> None:
         super().__init__("战术对抗赛", (211, 3, 135, 58))
+
+
+class __战术对抗赛_对战对手(可以点击空白处, Element):
+    name = "战术对抗赛_对战对手"
+    area = [(858, 140, 199, 63)]
+
+    def __init__(self) -> None:
+        self.src = self.Preprocessing(images.get("咖啡厅_收益"))
+
+    def Preprocessing(self, image: Image) -> Image:
+        return image.Crop((858, 140, 199, 63)).Threshold(100)
+
+    def Like(self, image: Image) -> bool:
+        return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
 
 
 Unknow = __Unknow()
@@ -559,6 +576,7 @@ Unknow = __Unknow()
 战术对抗赛 = __战术对抗赛()
 咖啡厅_MoomTalk = __咖啡厅_MoomTalk()
 咖啡厅_MoomTalk_通知 = __咖啡厅_MoomTalk_通知()
+战术对抗赛_对战对手 = __战术对抗赛_对战对手()
 All: list[Element] = [
     获得奖励,
     登录_通知,
@@ -577,6 +595,7 @@ All: list[Element] = [
     登录_更新提醒,
     邮箱,
     业务区,
+    战术对抗赛,
     战术对抗赛,
 ]
 
@@ -622,40 +641,47 @@ class Graph:
         咖啡厅_MoomTalk_通知: [咖啡厅_MoomTalk],
         邮箱: [大厅, 获得奖励],
         业务区: [大厅, 战术对抗赛],
-        战术对抗赛: [业务区, 获得奖励, 大厅],
+        战术对抗赛: [业务区, 获得奖励, 大厅, 战术对抗赛_对战对手],
+        战术对抗赛_对战对手: [战术对抗赛],
     }
-    actions: dict[Edge, list[Action]] = {
-        Edge(登录_进入游戏, 大厅): [登录_进入游戏.空白处],
-        Edge(大厅, 小组大厅): [大厅.小组],
-        Edge(大厅, 工作任务): [大厅.工作任务],
-        Edge(大厅, 大厅_全屏): [大厅.全屏大厅],
-        Edge(大厅, 咖啡厅): [大厅.咖啡厅],
-        Edge(大厅, 咖啡厅_说明): [大厅.咖啡厅],
-        Edge(大厅, 邮箱): [大厅.邮箱],
-        Edge(大厅, 业务区): [大厅.业务区],
-        Edge(大厅, 小组大厅_签到奖励): [大厅.小组],
-        Edge(大厅_全屏, 大厅): [大厅_全屏.退出全屏],
-        Edge(小组大厅, 大厅): [小组大厅.返回],
-        Edge(小组大厅_签到奖励, 小组大厅): [小组大厅_签到奖励.空白处],
-        Edge(工作任务, 大厅): [工作任务.返回],
-        Edge(工作任务, 获得奖励): [工作任务.一键领取, 工作任务.领取],
-        Edge(咖啡厅, 大厅): [咖啡厅.返回],
-        Edge(咖啡厅, 咖啡厅_收益): [咖啡厅.收益],
-        Edge(咖啡厅, 咖啡厅_MoomTalk): [咖啡厅.邀请劵],
-        Edge(咖啡厅_MoomTalk, 咖啡厅): [咖啡厅_MoomTalk.空白处],
-        Edge(咖啡厅_MoomTalk, 咖啡厅_MoomTalk_通知): [咖啡厅_MoomTalk.邀请按钮],
-        Edge(咖啡厅_MoomTalk_通知, 咖啡厅_MoomTalk): [咖啡厅_MoomTalk_通知.空白处],
-        Edge(咖啡厅_收益, 咖啡厅): [咖啡厅_收益.空白处],
-        Edge(咖啡厅_收益, 获得奖励): [咖啡厅_收益.领取],
-        Edge(咖啡厅_说明, 咖啡厅): [咖啡厅_说明.空白处],
-        Edge(邮箱, 获得奖励): [邮箱.一键领取],
-        Edge(邮箱, 大厅): [邮箱.返回],
-        Edge(业务区, 大厅): [业务区.返回],
-        Edge(业务区, 战术对抗赛): [业务区.战术对抗赛],
-        Edge(战术对抗赛, 业务区): [战术对抗赛.返回],
-        Edge(战术对抗赛, 获得奖励): [战术对抗赛.每日奖励, 战术对抗赛.时间奖励],
-        Edge(战术对抗赛, 大厅): [战术对抗赛.大厅],
-    }
+    actions: list[tuple[Edge, list[Action]]] = [
+        (Edge(登录_进入游戏, 大厅), [登录_进入游戏.空白处]),
+        (Edge(大厅, 小组大厅), [大厅.小组]),
+        (Edge(大厅, 工作任务), [大厅.工作任务]),
+        (Edge(大厅, 大厅_全屏), [大厅.全屏大厅]),
+        (Edge(大厅, 咖啡厅), [大厅.咖啡厅]),
+        (Edge(大厅, 咖啡厅_说明), [大厅.咖啡厅]),
+        (Edge(大厅, 邮箱), [大厅.邮箱]),
+        (Edge(大厅, 业务区), [大厅.业务区]),
+        (Edge(大厅, 小组大厅_签到奖励), [大厅.小组]),
+        (Edge(大厅_全屏, 大厅), [大厅_全屏.退出全屏]),
+        (Edge(小组大厅, 大厅), [小组大厅.返回]),
+        (Edge(小组大厅_签到奖励, 小组大厅), [小组大厅_签到奖励.空白处]),
+        (Edge(工作任务, 大厅), [工作任务.返回]),
+        (Edge(工作任务, 获得奖励), [工作任务.领取]),
+        (Edge(工作任务, 获得奖励), [工作任务.一键领取]),
+        (Edge(咖啡厅, 大厅), [咖啡厅.返回]),
+        (Edge(咖啡厅, 咖啡厅_收益), [咖啡厅.收益]),
+        (Edge(咖啡厅, 咖啡厅_MoomTalk), [咖啡厅.邀请劵]),
+        (Edge(咖啡厅_MoomTalk, 咖啡厅), [咖啡厅_MoomTalk.空白处]),
+        (Edge(咖啡厅_MoomTalk, 咖啡厅_MoomTalk_通知), [咖啡厅_MoomTalk.邀请按钮]),
+        (Edge(咖啡厅_MoomTalk_通知, 咖啡厅_MoomTalk), [咖啡厅_MoomTalk_通知.空白处]),
+        (Edge(咖啡厅_收益, 咖啡厅), [咖啡厅_收益.空白处]),
+        (Edge(咖啡厅_收益, 获得奖励), [咖啡厅_收益.领取]),
+        (Edge(咖啡厅_说明, 咖啡厅), [咖啡厅_说明.空白处]),
+        (Edge(邮箱, 获得奖励), [邮箱.一键领取]),
+        (Edge(邮箱, 大厅), [邮箱.返回]),
+        (Edge(业务区, 大厅), [业务区.返回]),
+        (Edge(业务区, 战术对抗赛), [业务区.战术对抗赛]),
+        (Edge(战术对抗赛, 业务区), [战术对抗赛.返回]),
+        (Edge(战术对抗赛, 获得奖励), [战术对抗赛.每日奖励]),
+        (Edge(战术对抗赛, 获得奖励), [战术对抗赛.时间奖励]),
+        (Edge(战术对抗赛, 大厅), [战术对抗赛.大厅]),
+        (Edge(战术对抗赛, 战术对抗赛_对战对手), [战术对抗赛.对手1]),
+        (Edge(战术对抗赛, 战术对抗赛_对战对手), [战术对抗赛.对手2]),
+        (Edge(战术对抗赛, 战术对抗赛_对战对手), [战术对抗赛.对手3]),
+        (Edge(战术对抗赛_对战对手, 战术对抗赛), [战术对抗赛_对战对手.空白处]),
+    ]
 
     def Draw(self, file: str):
         import matplotlib.pyplot as plt
@@ -689,14 +715,17 @@ class Graph:
                 fontsize=12,
                 color="white",
             )
-
-        edgeLabels = {}
+        edgeLabels: dict[tuple[str, str], list[str]] = {}
         for a in self.actions:
-            label = ""
-            for action in self.actions[a]:
-                label += "\n" + action.type.value + ":" + str(action)
-            label = label[1:]
-            edgeLabels[(a.frome, a.to)] = label
+            labels = []
+            for action in a[1]:
+                labels.append(action.type.value + ":" + str(action))
+            key = (str(a[0].frome), str(a[0].to))
+
+            if key not in edgeLabels:
+                edgeLabels[key] = []
+            edgeLabels[key].append("->".join(labels))
+
         colors = [
             "#1f77b4",
             "#2ca02c",
@@ -735,8 +764,8 @@ class Graph:
             for to_vertex in self.graph[from_vertex]:
                 color = random.choice(colors)
                 rad = 0.3
-                connectionstyle = f"arc3,rad={rad if (from_vertex, to_vertex) in edgeLabels and (to_vertex, from_vertex) in edgeLabels else 0}"
-                label = edgeLabels[(from_vertex, to_vertex)]
+                connectionstyle = f"arc3,rad={rad if (str(from_vertex), str(to_vertex)) in edgeLabels and (str(to_vertex), str(from_vertex)) in edgeLabels else 0}"
+                label = edgeLabels[(str(from_vertex), str(to_vertex))]
                 arrow = nx.draw_networkx_edges(
                     G,
                     pos,
@@ -759,7 +788,7 @@ class Graph:
                 plt.text(
                     midpoint[0],
                     midpoint[1],
-                    label,
+                    "\n".join(label),
                     color=color,
                     ha="center",
                     va="center",
@@ -767,7 +796,7 @@ class Graph:
                     transform=path_transform,
                     fontproperties=font_prop,
                 )
-        plt.savefig(file, dpi=600)
+        plt.savefig(file + ".png", dpi=600)
 
     def Show(self, output: str = "scens"):
         from pyvis.network import Network
@@ -813,19 +842,25 @@ class Graph:
             directed=True,
             bgcolor="#000000",
         )
+        edgeLabels: dict[tuple[str, str], list[str]] = {}
         for a in self.actions:
-            label = ""
-            for action in self.actions[a]:
-                label += "\n" + action.type.value + ":" + str(action)
-                label = label[1:]
-                net.add_node(str(a.frome), physics=False)
-                net.add_node(str(a.to), physics=False)
-                net.add_edge(
-                    str(a.frome),
-                    str(a.to),
-                    label=label,
-                    arrowStrikethrough=False,
-                )
+            labels = []
+            for action in a[1]:
+                labels.append(action.type.value + ":" + str(action))
+            key = (str(a[0].frome), str(a[0].to))
+
+            if key not in edgeLabels:
+                edgeLabels[key] = []
+            edgeLabels[key].append("->".join(labels))
+        for node, labels in edgeLabels.items():
+            net.add_node(node[0], physics=False)
+            net.add_node(node[1], physics=False)
+            net.add_edge(
+                node[0],
+                node[1],
+                label="\n".join(labels),
+                arrowStrikethrough=False,
+            )
         for node in net.nodes:
             node["title"] = node["id"]
             node["title"] = node["id"]
@@ -847,7 +882,7 @@ class Graph:
                 "background": "none",
                 "color": color,
                 "strokeWidth": 1,
-                "strokeColor": "#b2b2b2",
+                "strokeColor": "#000000",
             }
             edge["smooth"] = {
                 "type": "curvedCW",

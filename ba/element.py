@@ -12,7 +12,7 @@ class Preprocessor(Protocol):
 
 
 class Likeable(Protocol):
-    def Like(self, templ: Image) -> bool: ...
+    def Like(self, image: Image) -> bool: ...
 
 
 class Ocrable(Protocol[T]):
