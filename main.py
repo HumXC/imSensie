@@ -23,6 +23,14 @@ game.Launch()
 flags: dict[str, bool] = {}
 
 
+def Goto(scene: scenes.Element) -> bool:
+    ok, msg = game.Goto(scene)
+    if not ok:
+        print(msg)
+        return False
+    return True
+
+
 def GetFlag(name: str) -> bool:
     if name not in flags:
         flags[name] = False
@@ -36,17 +44,15 @@ def SetFlag(name: str, value: bool):
 
 
 def 领取咖啡厅收益():
-    ok, msg = game.Goto(scenes.咖啡厅_收益)
+    ok = Goto(scenes.咖啡厅_收益)
     if not ok:
-        print(msg)
         return False
     game.DoAction(scenes.咖啡厅_收益.领取)
 
 
 def 咖啡厅邀请(name: str) -> bool:
-    ok, msg = game.Goto(scenes.咖啡厅_MoomTalk)
+    ok = Goto(scenes.咖啡厅_MoomTalk)
     if not ok:
-        print(msg)
         return False
     latestStudents = []
     while True:
@@ -73,23 +79,37 @@ def 咖啡厅邀请(name: str) -> bool:
 
 
 def 领取邮箱() -> bool:
-    ok, msg = game.Goto(scenes.邮箱)
+    ok = game.Goto(scenes.邮箱)
     if not ok:
-        print(msg)
         return False
     return game.IfLikeAndDo(scenes.邮箱.一键领取)
 
 
 def 领取工作任务奖励() -> bool:
-    ok, msg = game.Goto(scenes.工作任务)
+    ok = game.Goto(scenes.工作任务)
     if not ok:
-        print(msg)
         return False
     return game.IfLikeAndDo(scenes.工作任务.一键领取)
 
 
+def 领取战术对抗赛奖励():
+    ok = Goto(scenes.战术对抗赛)
+    if not ok:
+        return False
+    ok = game.IfLikeAndDo(scenes.战术对抗赛.每日奖励)
+    if not ok:
+        print("无法领取: 战术对抗赛.每日奖励")
+    ok = Goto(scenes.战术对抗赛)
+    if not ok:
+        return False
+    ok = game.IfLikeAndDo(scenes.战术对抗赛.时间奖励)
+    if not ok:
+        print("无法领取: 战术对抗赛.时间奖励")
+
+
 def main():
     咖啡厅邀请("千世")
+    领取战术对抗赛奖励()
     game.Goto(scenes.大厅)
     redPoints = game.FindRedPoint()
     for p in redPoints:
@@ -102,21 +122,6 @@ def main():
             continue
         if p == scenes.大厅.邮箱:
             领取邮箱()
-            continue
-        if p == scenes.大厅.业务区:
-            game.Goto(scenes.业务区)
-            redPoints = game.FindRedPoint()
-            for p in redPoints:
-                print(str(p))
-                if p == scenes.业务区.战术对抗赛:
-                    if GetFlag("战术对抗赛.每日奖励"):
-                        game.Goto(scenes.战术对抗赛)
-                        ok = game.IfLikeAndDo(scenes.战术对抗赛.每日奖励)
-                        SetFlag("战术对抗赛.每日奖励", ok)
-                    if GetFlag("战术对抗赛.时间奖励"):
-                        game.Goto(scenes.战术对抗赛)
-                        ok = game.IfLikeAndDo(scenes.战术对抗赛.时间奖励)
-                        SetFlag("战术对抗赛.时间奖励", ok)
             continue
 
     game.Goto(scenes.大厅_全屏)

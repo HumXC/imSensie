@@ -858,7 +858,8 @@ class Graph:
             remove(output + ".html")
         except:
             pass
-        net.show(output + ".html")
+        with open(output + ".html", "w", encoding="utf-8") as f:
+            f.write(net.generate_html())
 
     def FindPath(self, start: Element, end: Element) -> list[Element] | None:
         queue = deque([[start]])
