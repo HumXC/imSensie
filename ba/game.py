@@ -154,7 +154,6 @@ class Game:
             return True
         return False
 
-    @utils.Timeit
     def Goto(self, s: element.Element, findName: str | None = None) -> tuple[bool, str]:
         while True:
             cs = self.CurrentScene()
@@ -165,8 +164,8 @@ class Game:
             path = self.grap.FindPath(cs, s)
             if path is None:
                 raise Exception(f"path not found [{cs.name}] -> [{s.name}]")
-            action = self.grap.FindActions(path[:2])[0]
-            for a in action:
+            actions = self.grap.FindActions(path[:2])[0]
+            for a in actions:
                 ok, msg = self.DoAction(a, findName)
                 if not ok:
                     return False, msg
