@@ -853,8 +853,8 @@ class Graph:
                 edgeLabels[key] = []
             edgeLabels[key].append("->".join(labels))
         for node, labels in edgeLabels.items():
-            net.add_node(node[0], physics=False)
-            net.add_node(node[1], physics=False)
+            net.add_node(node[0], physics=False, color="#448beba8")
+            net.add_node(node[1], physics=False, color="#448beba8")
             net.add_edge(
                 node[0],
                 node[1],
