@@ -547,10 +547,38 @@ class __战术对抗赛_对战对手(可以点击空白处, Element):
     area = [(858, 140, 199, 63)]
 
     def __init__(self) -> None:
-        self.src = self.Preprocessing(images.get("咖啡厅_收益"))
+        self.src = self.Preprocessing(images.get("战术对抗赛_对战对手"))
 
     def Preprocessing(self, image: Image) -> Image:
         return image.Crop((858, 140, 199, 63)).Threshold(100)
+
+    def Like(self, image: Image) -> bool:
+        return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
+
+
+class __战术对抗赛_对战结果_获胜(可以点击空白处, Element):
+    name = "战术对抗赛_对战结果_获胜"
+    area = [(864, 209, 192, 61)]
+
+    def __init__(self) -> None:
+        self.src = self.Preprocessing(images.get("战术对抗赛_对战结果_获胜"))
+
+    def Preprocessing(self, image: Image) -> Image:
+        return image.Crop((864, 209, 192, 61)).Threshold(100)
+
+    def Like(self, image: Image) -> bool:
+        return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
+
+
+class __战术对抗赛_对战结果_失败(可以点击空白处, Element):
+    name = "战术对抗赛_对战结果_失败"
+    area = [(864, 293, 194, 72)]
+
+    def __init__(self) -> None:
+        self.src = self.Preprocessing(images.get("战术对抗赛_对战结果_失败"))
+
+    def Preprocessing(self, image: Image) -> Image:
+        return image.Crop((864, 293, 194, 72)).Threshold(100)
 
     def Like(self, image: Image) -> bool:
         return self.src.MatchTemplate(self.Preprocessing(image)).IsMax(0.95)
@@ -577,6 +605,8 @@ Unknow = __Unknow()
 咖啡厅_MoomTalk = __咖啡厅_MoomTalk()
 咖啡厅_MoomTalk_通知 = __咖啡厅_MoomTalk_通知()
 战术对抗赛_对战对手 = __战术对抗赛_对战对手()
+战术对抗赛_对战结果_失败 = __战术对抗赛_对战结果_失败()
+战术对抗赛_对战结果_获胜 = __战术对抗赛_对战结果_获胜()
 All: list[Element] = [
     获得奖励,
     登录_通知,
@@ -597,6 +627,8 @@ All: list[Element] = [
     业务区,
     战术对抗赛,
     战术对抗赛,
+    战术对抗赛_对战结果_获胜,
+    战术对抗赛_对战结果_失败,
 ]
 
 
@@ -920,9 +952,10 @@ class Graph:
         result = []
         for i in range(len(path) - 1):
             edge = Edge(path[i], path[i + 1])
-            if edge in self.actions:
-                result.append(self.actions[edge])
-            else:
-                # 既然 path 不为 None, 那么必须是可达的
-                raise ValueError("path is not reachable")
+            for action in self.actions:
+                if action[0] == edge:
+                    result.append(action[1])
+        if len(result) == 0:
+            # 既然 path 不为 None, 那么必须是可达的
+            raise ValueError("path is not reachable")
         return result
